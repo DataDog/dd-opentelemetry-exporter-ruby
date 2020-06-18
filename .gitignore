@@ -1,0 +1,11 @@
+**/Gemfile.lock
+**/.yardoc
+**/doc
+**/docs
+**/coverage
+**/*.gem
+**/.bundle
+**/.DS_Store
+
+# Appraisals
+adapters/**/*.gemfile.lock
