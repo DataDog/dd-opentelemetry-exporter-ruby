@@ -127,13 +127,16 @@ module OpenTelemetry
             # Parse span exception type, msg, and stack from span events
             error_event = span.events.find { |ev| ev.name == 'error' }
 
-            return unless error_event
+            return ['','',''] unless error_event
 
             err_type = error_event.attributes['error.type']
             err_msg = error_event.attributes['error.msg']
             err_stack = error_event.attributes['error.stack']
 
             [err_type, err_msg, err_stack]
+          rescue StandardError => exception
+            OpenTelemetry.logger.debug("error getting error info from span events: #{span.events} , #{exception.message}")
+            ['','','']
           end
 
           def get_resource(span)
