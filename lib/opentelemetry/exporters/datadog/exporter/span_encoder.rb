@@ -125,7 +125,7 @@ module OpenTelemetry
 
           def get_exception_info(span)
             # Parse span exception type, msg, and stack from span events
-            error_event = span.events.find { |ev| ev.name == 'error' }
+            error_event = span.events&.find { |ev| ev.name == 'error' }
 
             return ['','',''] unless error_event
 

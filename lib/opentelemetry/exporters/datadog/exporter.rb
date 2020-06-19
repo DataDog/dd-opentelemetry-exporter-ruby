@@ -5,7 +5,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 require 'uri'
-require 'ddtrace'
+require 'ddtrace/writer'
+require 'ddtrace/transport/http'
 require 'opentelemetry/sdk'
 require 'opentelemetry/exporters/datadog/exporter/span_encoder'
 # require_relative './exporter/span_encoder.rb'
@@ -74,6 +75,8 @@ module OpenTelemetry
             port = uri_parsed.port
 
             @agent_writer = ::Datadog::Writer.new(hostname: hostname, port: port)
+
+            puts @agent_writer.inspect
           elsif uri_parsed.to_s.index('/sock')
             # handle uds path
             transport = ::Datadog::Transport::HTTP.default do |t|
