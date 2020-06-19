@@ -37,6 +37,7 @@ module OpenTelemetry
           @tags = tags || ENV.fetch('DD_TAGS', nil)
 
           @agent_writer = get_writer(@agent_url)
+          OpenTelemetry.logger.debug("agent wrriterr info #{@agent_writer.inspect}")
 
           @span_encoder = SpanEncoder.new
         end
