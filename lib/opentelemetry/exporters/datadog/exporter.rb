@@ -27,6 +27,7 @@ module OpenTelemetry
         private_constant(:SUCCESS, :FAILURE)
 
         def initialize(service_name: nil, agent_url: nil, env: nil, version: nil, tags: nil)
+          OpenTelemetry.logger.debug("initing exporter")
           @shutdown = false
           @agent_url = agent_url || ENV.fetch('DD_TRACE_AGENT_URL', DEFAULT_AGENT_URL)
 
@@ -48,6 +49,7 @@ module OpenTelemetry
         #   exported.
         # @return [Integer] the result of the export.
         def export(spans)
+          OpenTelemetry.logger.debug("agent writer about to export")
           return FAILURE if @shutdown
 
           if @agent_writer
@@ -69,6 +71,7 @@ module OpenTelemetry
         private
 
         def get_writer(uri)
+          OpenTelemetry.logger.debug("gettig agent writer #{uri.inspect}")
           uri_parsed = URI.parse(uri)
 
           if %w[http https].include?(uri_parsed.scheme)
@@ -77,7 +80,7 @@ module OpenTelemetry
 
             @agent_writer = ::Datadog::Writer.new(hostname: hostname, port: port)
 
-            puts @agent_writer.inspect
+            OpenTelemetry.logger.debug("set agent writer #{@agent_writer.inspect}")
           elsif uri_parsed.to_s.index('/sock')
             # handle uds path
             transport = ::Datadog::Transport::HTTP.default do |t|

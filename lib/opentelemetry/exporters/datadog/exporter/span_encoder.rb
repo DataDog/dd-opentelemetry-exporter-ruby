@@ -135,7 +135,7 @@ module OpenTelemetry
 
             [err_type, err_msg, err_stack]
           rescue StandardError => exception
-            OpenTelemetry.logger.debug("error getting error info from span events: #{span.events} , #{exception.message}")
+            OpenTelemetry.logger.debug("error on exception info from span events: #{span.events} , #{exception.message}")
             ['','','']
           end
 
