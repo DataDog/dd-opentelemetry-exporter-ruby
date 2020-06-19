@@ -7,6 +7,7 @@
 require 'uri'
 require 'ddtrace/writer'
 require 'ddtrace/transport/http'
+require 'ddtrace/transport/http/adapters/net'
 require 'opentelemetry/sdk'
 require 'opentelemetry/exporters/datadog/exporter/span_encoder'
 # require_relative './exporter/span_encoder.rb'
@@ -78,7 +79,13 @@ module OpenTelemetry
             hostname = uri_parsed.hostname
             port = uri_parsed.port
 
-            @agent_writer = ::Datadog::Writer.new(hostname: hostname, port: port)
+            adapter = ::Datadog::Transport::HTTP::Adapters::Net.new(hostname, port)
+
+            transport = ::Datadog::Transport::HTTP.default do |t|
+              t.adapter adapter
+            end
+
+            @agent_writer = ::Datadog::Writer.new(transport: transport)
 
             OpenTelemetry.logger.debug("set agent writer #{@agent_writer.inspect}")
           elsif uri_parsed.to_s.index('/sock')
