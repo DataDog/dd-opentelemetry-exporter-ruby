@@ -26,10 +26,8 @@ module OpenTelemetry
         private_constant(:SUCCESS, :FAILURE)
 
         def initialize(service_name: nil, agent_url: nil, env: nil, version: nil, tags: nil)
-          OpenTelemetry.logger.debug("initing exporter")
           @shutdown = false
           @agent_url = agent_url || ENV.fetch('DD_TRACE_AGENT_URL', DEFAULT_AGENT_URL)
-
           @service = service_name || ENV.fetch('DD_SERVICE', DEFAULT_SERVICE_NAME)
 
           @env = env || ENV.fetch('DD_ENV', nil)
@@ -37,7 +35,6 @@ module OpenTelemetry
           @tags = tags || ENV.fetch('DD_TAGS', nil)
 
           @agent_writer = get_writer(@agent_url)
-          OpenTelemetry.logger.debug("agent wrriterr info #{@agent_writer.inspect}")
 
           @span_encoder = SpanEncoder.new
         end
@@ -48,7 +45,6 @@ module OpenTelemetry
         #   exported.
         # @return [Integer] the result of the export.
         def export(spans)
-          OpenTelemetry.logger.debug("agent writer about to export")
           return FAILURE if @shutdown
 
           if @agent_writer
@@ -70,7 +66,6 @@ module OpenTelemetry
         private
 
         def get_writer(uri)
-          OpenTelemetry.logger.debug("gettig agent writer #{uri.inspect}")
           uri_parsed = URI.parse(uri)
 
           if %w[http https].include?(uri_parsed.scheme)
@@ -83,20 +78,16 @@ module OpenTelemetry
               t.adapter adapter
             end
 
-            @agent_writer = ::Datadog::Writer.new(transport: transport)
-
-            OpenTelemetry.logger.debug("set agent writer #{@agent_writer.inspect}")
-            @agent_writer
+            ::Datadog::Writer.new(transport: transport)
           elsif uri_parsed.to_s.index('/sock')
             # handle uds path
             transport = ::Datadog::Transport::HTTP.default do |t|
               t.adapter :unix, uri_parsed.to_s
             end
 
-            @agent_writer = ::Datadog::Writer.new(transport: transport)
+            ::Datadog::Writer.new(transport: transport)
           else
             OpenTelemetry.logger.warn('only http/https and uds is supported at this time')
-            false
           end
         end
       end
