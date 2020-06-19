@@ -5,9 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 require 'uri'
-require 'ddtrace/writer'
-require 'ddtrace/transport/http'
-require 'ddtrace/transport/http/adapters/net'
+require 'ddtrace'
 require 'opentelemetry/sdk'
 require 'opentelemetry/exporters/datadog/exporter/span_encoder'
 # require_relative './exporter/span_encoder.rb'
