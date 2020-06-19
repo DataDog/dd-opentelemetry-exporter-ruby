@@ -88,6 +88,7 @@ module OpenTelemetry
             @agent_writer = ::Datadog::Writer.new(transport: transport)
 
             OpenTelemetry.logger.debug("set agent writer #{@agent_writer.inspect}")
+            @agent_writer
           elsif uri_parsed.to_s.index('/sock')
             # handle uds path
             transport = ::Datadog::Transport::HTTP.default do |t|
@@ -97,6 +98,7 @@ module OpenTelemetry
             @agent_writer = ::Datadog::Writer.new(transport: transport)
           else
             OpenTelemetry.logger.warn('only http/https and uds is supported at this time')
+            false
           end
         end
       end
