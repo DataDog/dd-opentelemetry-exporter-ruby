@@ -25,6 +25,7 @@ module OpenTelemetry
         SCHEDULE_DELAY_MILLIS = 3_000
         MAX_QUEUE_SIZE = 2048
         MAX_TRACE_SIZE = 1024
+        PROBABILITY_REGEX = /\d[.]\d{1,6}/.freeze
         private_constant(:SCHEDULE_DELAY_MILLIS, :MAX_QUEUE_SIZE, :MAX_TRACE_SIZE)
 
         def initialize(exporter:,
@@ -48,19 +49,35 @@ module OpenTelemetry
           @traces_spans_ended_count = {}
           @check_traces_queue = []
           @_spans_dropped = false
+          @probability = nil
         end
 
         # datadog trace-agent endpoint requires a complete trace to be sent
         # threadsafe may block on lock
         def on_start(span)
+          # check once for probabilility based sampling rate
+          @probability ||= get_rate_from_description(span)
+
           context = span.context
           trace_id = context.trace_id
 
           lock do
             if all_spans_count(traces_spans_count) >= max_queue_size
-              OpenTelemetry.logger.warn('Max spans for all traces, spans will be dropped')
-              @_spans_dropped = true
-              return
+              # instead of just dropping all new spans, dd-trace-rb drops a random trace
+              # https://github.com/DataDog/dd-trace-rb/blob/c6fbf2410a60495f1b2d8912bf7ea7dc63422141/lib/ddtrace/buffer.rb#L34-L36
+              # It allows for a more fair usage of the queue when under stress load,
+              # and will create proportional representation of code paths being instrumented at stress time.
+              unfinished_trace_id = fetch_unfinished_trace_id
+
+              # if there are no unfinished traces able to be dropped, don't add more spans, and return early
+              if unfinished_trace_id.nil?
+                OpenTelemetry.logger.warn('Max spans for all traces, spans will be dropped')
+                @_spans_dropped = true
+                return
+              end
+
+              drop_unfinished_trace(unfinished_trace_id)
+              OpenTelemetry.logger.warn('Max spans for all traces, traces will be dropped')
             end
 
             if traces[trace_id].nil?
@@ -68,7 +85,7 @@ module OpenTelemetry
               traces_spans_count[trace_id] = 1
             else
               if traces[trace_id].size >= max_trace_size
-                OpenTelemetry.logger.warn('Max spans for all traces, spans will be dropped')
+                OpenTelemetry.logger.warn('Max spans for trace, spans will be dropped')
                 @_spans_dropped = true
                 return
               end
@@ -154,8 +171,14 @@ module OpenTelemetry
         def export_batch(trace_spans)
           return if trace_spans.empty?
 
+          is_datadog_exporter = @exporter.is_a?(Datadog::Exporter)
+
           trace_spans.each do |spans|
-            @exporter.export(spans)
+            if is_datadog_exporter && @probability
+              @exporter.export(spans, @probability)
+            else
+              @exporter.export(spans)
+            end
           rescue StandardError => e
             OpenTelemetry.logger.warn("Exception while exporting Span batch. #{e.message} , #{e.backtrace}")
           end
@@ -186,6 +209,35 @@ module OpenTelemetry
 
         def fetch_spans(spans)
           spans.map!(&:to_span_data)
+        end
+
+        def fetch_unfinished_trace_id
+          # don't delete potentially finished trace awaiting export
+          unfinished_traces = traces.keys - check_traces_queue
+          unfinished_traces[rand(unfinished_traces.length)]
+        end
+
+        def drop_unfinished_trace(trace_id)
+          traces.delete(trace_id)
+          traces_spans_count.delete(trace_id)
+          traces_spans_ended_count.delete(trace_id)
+        end
+
+        def get_rate_from_description(span)
+          # format to parse of sampler description is
+          # "ProbabilitySampler{1.000000}" or
+          # "AlwaysOnSampler" / "AlwaysOffSampler"
+          return false unless span.trace_config&.sampler&.is_a?(ProbabilitySampler)
+
+          rate = span.trace_config&.sampler&.description&.match(PROBABILITY_REGEX)
+
+          return false unless rate
+
+          rate[0].to_f(4)
+        rescue StandardError => e
+          # rescue just in case the format changes dramatically in the future
+          OpenTelemetry.logger.warn("error while extracting sampling rate #{e.message} , #{e.backtrace}")
+          false
         end
 
         def lock
