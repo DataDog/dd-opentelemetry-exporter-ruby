@@ -130,6 +130,8 @@ module OpenTelemetry
 
             instrumentation_name = span.instrumentation_library.name
             INSTRUMENTATION_SPAN_TYPES[instrumentation_name]
+          rescue NoMethodError
+            span.name
           end
 
           def get_exception_info(span)
@@ -174,6 +176,8 @@ module OpenTelemetry
             instrumentation_name = span.instrumentation_library&.name
             kind = span.kind
             instrumentation_name && kind ? "#{instrumentation_name.to_s.gsub(':', '_')}.#{kind}" : span.name
+          rescue NoMethodError
+            span.name
           end
 
           def get_origin_string(span)

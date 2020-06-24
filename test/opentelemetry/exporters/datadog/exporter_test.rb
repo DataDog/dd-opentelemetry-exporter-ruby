@@ -176,6 +176,7 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
                        end_timestamp: Time.now, attributes: nil, links: nil, events: nil, library_resource: nil, instrumentation_library: nil,
                        span_id: OpenTelemetry::Trace.generate_span_id, trace_id: OpenTelemetry::Trace.generate_trace_id,
                        trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT)
+
     OpenTelemetry::SDK::Trace::SpanData.new(name, kind, status, parent_span_id, child_count, total_recorded_attributes,
                                             total_recorded_events, total_recorded_links, start_timestamp, end_timestamp,
                                             attributes, links, events, library_resource, instrumentation_library, span_id, trace_id, trace_flags)

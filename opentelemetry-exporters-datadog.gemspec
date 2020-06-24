@@ -27,8 +27,8 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.5.0'
 
   spec.add_dependency 'ddtrace', '~> 0.36'
-  spec.add_dependency 'opentelemetry-api', '~> 0.4.0'
-  spec.add_dependency 'opentelemetry-sdk', '~> 0.4.0'
+  spec.add_dependency 'opentelemetry-sdk', '~> 0.4'
+  spec.add_dependency 'opentelemetry-api', '~> 0.4'
 
   spec.add_development_dependency 'bundler', '>= 1.17'
   spec.add_development_dependency 'faraday', '~> 0.13'
