@@ -79,11 +79,6 @@ module OpenTelemetry
                 end
               end
 
-              # set tags
-              span.attributes&.keys&.each do |attribute|
-                datadog_span.set_tag(attribute, span.attributes[attribute])
-              end
-
               # set default tags
               default_tags&.keys&.each do |attribute|
                 datadog_span.set_tag(attribute, span.attributes[attribute])
@@ -93,6 +88,11 @@ module OpenTelemetry
               datadog_span.set_tag(DD_ORIGIN, origin) if origin && parent_id.zero?
               datadog_span.set_tag(VERSION_KEY, version) if version && parent_id.zero?
               datadog_span.set_tag(ENV_KEY, env) if env
+
+              # set tags - takes precedence over env vars
+              span.attributes&.keys&.each do |attribute|
+                datadog_span.set_tag(attribute, span.attributes[attribute])
+              end              
 
               sampling_rate = get_sampling_rate(span)
 

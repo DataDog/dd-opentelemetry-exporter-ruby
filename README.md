@@ -89,6 +89,64 @@ OpenTelemetry.tracer_provider.active_trace_config  = OpenTelemetry::SDK::Tracer:
 )
 ```
 
+## Configuration Options
+
+#### Configuration Options - Datadog Agent URL
+
+By default the OpenTelemetry Datadog Exporter transmits traces to localhost:8126. You can configure the application to send traces to a diffent URL using the following environmennt variables:
+
+ - `DD_TRACE_AGENT_URL`: The `<host>:<port:` where you Datadog Agent is listening for traces. (e.g. `agent-host:8126`)
+
+These values can also be overridden at the trace exporter level:
+
+```ruby
+# Configure the sdk with custom export
+OpenTelemetry::SDK.configure do |c|
+  c.add_span_processor(
+    OpenTelemetry::SDK::Trace::Export::DatadogSpanProcessor.new(
+      OpenTelemetry::Exporters::Datadog::Exporter.new(
+        service_name: 'my_service',
+        agent_url: 'http://dd-agent:8126',
+      )
+    )
+  )
+end
+```
+
+#### Configuration Options - Tagging
+
+You can configure the application to automatically tag your Datadog exported traces, using the following environment variables:
+
+ - `DD_ENV`: Your application environment (e.g. `production`, `staging`, etc.)
+ - `DD_SERVICE`: Your application's default service name (e.g. `billing-api`)
+ - `DD_VERSION`: Your application version (e.g. `2.5`, `202003181415`, `1.3-alpha`, etc.)
+ - `DD_TAGS`: Custom tags in value pairs separated by `,` (e.g. `layer:api,team:intake`)
+    - If `DD_ENV`, `DD_SERVICE` or `DD_VERSION` are set, it will override any respective `env`/`service`/`version` tag defined in `DD_TAGS`.
+    - If `DD_ENV`, `DD_SERVICE` or `DD_VERSION` are NOT set, tags defined in `DD_TAGS` will be used to populate `env`/`service`/`version` respectively.
+
+These values can also be overridden at the trace exporter level:
+
+```ruby
+# Configure the sdk with custom export
+OpenTelemetry::SDK.configure do |c|
+  c.add_span_processor(
+    OpenTelemetry::SDK::Trace::Export::DatadogSpanProcessor.new(
+      OpenTelemetry::Exporters::Datadog::Exporter.new(
+        service_name: 'my_service',
+        agent_url: 'http://localhost:8126',
+        env: 'prod',
+        version: '1.5-alpha',
+        tags: 'team:ops,region:west'
+      )
+    )
+  )
+end
+```
+
+This enables you to set this value on a per application basis, so you can have for example several applications reporting for different environments on the same host.
+
+Tags can also be set directly on individual spans, which will supersede any conflicting tags defined at the application level.
+
 ## How can I get involved?
 
 The `opentelemetry-exporters-datadog` gem source is [on github][repo-github], along with related gems including `opentelemetry-sdk`.
