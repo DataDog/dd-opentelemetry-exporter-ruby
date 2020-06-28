@@ -7,6 +7,18 @@
 
 require 'test_helper'
 
+# Give access to otherwise private members
+module OpenTelemetry
+  module Context
+    module Propagation
+      class CompositePropagator
+        attr_accessor :injectors, :extractors
+      end
+    end
+  end
+end
+
+
 describe OpenTelemetry::Exporters::Datadog::Exporter do
   Span = OpenTelemetry::Trace::Span
   SpanContext = OpenTelemetry::Trace::SpanContext
@@ -157,14 +169,19 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
 
   describe '#auto_configure' do
     it 'includes datadog propagation in the http extractors and injectors' do
-      http_propagators = OpenTelemetry.propagation.http
+      default_http_propagators = OpenTelemetry.propagation.http
+
+      OpenTelemetry::SDK.configure
       OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
 
       # expect injects and extractors list to include datadog format
-      # expect(http_propagators.injectors.map).
+      updated_extractors = default_http_propagators.extractors
+      updated_injectors = default_http_propagators.injectors
 
-
-
+      _(updated_injectors.length).must_equal(3)
+      _(updated_extractors.length).must_equal(3)
+      _(updated_injectors.map{|inj| inj.class }).must_include(OpenTelemetry::Exporters::Datadog::Propagator)
+      _(updated_extractors.map{|extr| extr.class }).must_include(OpenTelemetry::Exporters::Datadog::Propagator)
     end
   end
 end
