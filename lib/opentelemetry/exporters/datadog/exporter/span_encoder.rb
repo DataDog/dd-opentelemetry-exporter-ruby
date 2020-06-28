@@ -92,7 +92,7 @@ module OpenTelemetry
               # set tags - takes precedence over env vars
               span.attributes&.keys&.each do |attribute|
                 datadog_span.set_tag(attribute, span.attributes[attribute])
-              end              
+              end
 
               sampling_rate = get_sampling_rate(span)
 
