@@ -10,6 +10,7 @@ SimpleCov.start
 
 require 'opentelemetry-exporters-datadog'
 require 'opentelemetry-sdk'
+require 'opentelemetry-api'
 require 'minitest/autorun'
 require 'ddtrace/contrib/redis/ext'
 

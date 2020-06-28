@@ -17,12 +17,12 @@ Gem::Specification.new do |spec|
   spec.email       = ['dev@datadoghq.com']
 
   spec.summary     = 'Datadog trace exporter for the OpenTelemetry framework'
-  spec.description = <<-EOS.gsub(/^[\s]+/, '')
+  spec.description = <<-DESC.gsub(/^[\s]+/, '')
     opentelemetry-exporters-datadog is Datadog’s trace exporter for the OpenTelemetry
     Ruby tracing library, which  is used to trace requests across web servers, databases
     and microservices. The exporter formats and sends these traces to a Datadog Agent so
     that they can be ingested, stored, and analyzed with Datadog.
-  EOS
+  DESC
 
   spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-rubyy'
   spec.license     = 'Apache-2.0'
