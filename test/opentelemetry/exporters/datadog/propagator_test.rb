@@ -154,4 +154,17 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
       _(context.tracestate).must_equal(tracestate_header)
     end
   end
+
+  describe '#auto_configure' do
+    it 'includes datadog propagation in the http extractors and injectors' do
+      http_propagators = OpenTelemetry.propagation.http
+      OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
+
+      # expect injects and extractors list to include datadog format
+      # expect(http_propagators.injectors.map).
+
+
+
+    end
+  end
 end

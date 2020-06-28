@@ -23,6 +23,15 @@ module OpenTelemetry
         ORIGIN_KEY = 'x-datadog-origin'
         DD_ORIGIN = '_dd_origin'
         ORIGIN_REGEX = /#{DD_ORIGIN}\=(.*?)($|,)/.freeze
+        DEFAULT_INJECTORS = [
+          OpenTelemetry::Trace::Propagation::TraceContext.text_injector,
+          OpenTelemetry::CorrelationContext::Propagation.text_injector
+        ].freeze
+
+        DEFAULT_EXTRACTORS = [
+          OpenTelemetry::Trace::Propagation::TraceContext.rack_extractor,
+          OpenTelemetry::CorrelationContext::Propagation.rack_extractor
+        ].freeze
 
         # Returns a new Propagator
         def initialize
@@ -87,6 +96,16 @@ module OpenTelemetry
         rescue StandardError => e
           OpenTelemetry.logger.debug("error extracting datadog propagation, #{e.message}")
           context
+        end
+
+        def self.auto_configure
+          default_propagator = new
+          updated_injectors = DEFAULT_INJECTORS + [default_propagator]
+          updated_extractors = DEFAULT_EXTRACTORS + [default_propagator]
+          OpenTelemetry.propagation.http = OpenTelemetry::Context::Propagation::CompositePropagator.new(
+            updated_injectors,
+            updated_extractors
+          )
         end
 
         private

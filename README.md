@@ -33,7 +33,7 @@ require 'opentelemetry/exporters/datadog'
 # Configure the sdk with custom export
 OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
-    OpenTelemetry::SDK::Trace::Export::DatadogSpanProcessor.new(
+    OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor.new(
       OpenTelemetry::Exporters::Datadog::Exporter.new(
         service_name: 'my_service', agent_url: 'http://localhost:8126'
       )
@@ -55,6 +55,9 @@ injectors = [
   OpenTelemetry::CorrelationContext::Propagation.text_injector,
   OpenTelemetry::Exporters::Datadog::Propagator.new
 ]
+
+# Then, set http propagation to the Composite Propagator
+# OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
 
 OpenTelemetry.propagation.http = OpenTelemetry::Context::Propagation::CompositePropagator.new(injectors, extractors)
 
@@ -103,7 +106,7 @@ These values can also be overridden at the trace exporter level:
 # Configure the sdk with custom export
 OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
-    OpenTelemetry::SDK::Trace::Export::DatadogSpanProcessor.new(
+    OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor.new(
       OpenTelemetry::Exporters::Datadog::Exporter.new(
         service_name: 'my_service',
         agent_url: 'http://dd-agent:8126',
@@ -130,7 +133,7 @@ These values can also be overridden at the trace exporter level:
 # Configure the sdk with custom export
 OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
-    OpenTelemetry::SDK::Trace::Export::DatadogSpanProcessor.new(
+    OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor.new(
       OpenTelemetry::Exporters::Datadog::Exporter.new(
         service_name: 'my_service',
         agent_url: 'http://localhost:8126',
