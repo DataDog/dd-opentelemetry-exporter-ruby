@@ -1,6 +1,6 @@
 # Contributing
 
-Community contributions to the Datadog tracing library for Ruby are welcome! See below for some basic guidelines.
+Community contributions to the Datadog Opentelemetry Exporter library for Ruby are welcome! See below for some basic guidelines.
 
 ## Want to request a new feature?
 
@@ -25,7 +25,7 @@ Additionally, if you can, include:
 
 For any urgent matters (such as outages) or issues concerning the Datadog service or UI, contact our support team via https://docs.datadoghq.com/help/ for direct, faster assistance.
 
-You may submit bug reports concerning the Datadog tracing library for Ruby by [opening a Github issue](https://github.com/DataDog/dd-opentelemetry-exporters-ruby/issues/new). At a minimum, please provide:
+You may submit bug reports concerning the Datadog OpenTelemetry Exporter for Ruby by [opening a Github issue](https://github.com/DataDog/dd-opentelemetry-exporters-ruby/issues/new). At a minimum, please provide:
 
  - A description of the problem
  - Steps to reproduce

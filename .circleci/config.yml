@@ -50,3 +50,27 @@ jobs:
     executor: jruby92
     steps:
       - rake-test
+workflows:
+  version: 2
+  builds:
+    jobs:
+      - test-ruby25:
+          filters:
+            tags:
+              only: /^opentelemetry-.+\/v\d.*$/
+      - test-ruby26:
+          filters:
+            tags:
+              only: /^opentelemetry-.+\/v\d.*$/
+      - test-ruby27:
+          filters:
+            tags:
+              only: /^opentelemetry-.+\/v\d.*$/
+      - test-jruby:
+          filters:
+            tags:
+              only: /^opentelemetry-.+\/v\d.*$/
+      - test-jruby92:
+          filters:
+            tags:
+              only: /^opentelemetry-.+\/v\d.*$/
