@@ -28,7 +28,7 @@ gem 'opentelemetry-sdk', git: 'https://github.com/open-telemetry/opentelemetry-r
 
 ```ruby
 require 'opentelemetry/sdk'
-require 'opentelemetry/exporters/datadog'
+require 'opentelemetry-exporters-datadog'
 
 # Configure the sdk with custom export
 OpenTelemetry::SDK.configure do |c|
@@ -42,24 +42,24 @@ OpenTelemetry::SDK.configure do |c|
 end
 
 # For propagation of datadog specific distibuted tracing headers,
+# set http propagation to the Composite Propagator
+
+OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
+
+# For manual configuration of propagation of datadog specific distibuted tracing headers,
 # add the Datadog Propagator to the list of extractors and injectors, like below
 
-extractors = [
-  OpenTelemetry::Trace::Propagation::TraceContext.rack_extractor,
-  OpenTelemetry::CorrelationContext::Propagation.rack_extractor,
-  OpenTelemetry::Exporters::Datadog::Propagator.new
-]
-
-injectors = [
-  OpenTelemetry::Trace::Propagation::TraceContext.text_injector,
-  OpenTelemetry::CorrelationContext::Propagation.text_injector,
-  OpenTelemetry::Exporters::Datadog::Propagator.new
-]
-
-# Then, set http propagation to the Composite Propagator
-# OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
-
-OpenTelemetry.propagation.http = OpenTelemetry::Context::Propagation::CompositePropagator.new(injectors, extractors)
+# extractors = [
+#   OpenTelemetry::Trace::Propagation::TraceContext.rack_extractor,
+#   OpenTelemetry::CorrelationContext::Propagation.rack_extractor,
+#   OpenTelemetry::Exporters::Datadog::Propagator.new
+# ]
+# injectors = [
+#   OpenTelemetry::Trace::Propagation::TraceContext.text_injector,
+#   OpenTelemetry::CorrelationContext::Propagation.text_injector,
+#   OpenTelemetry::Exporters::Datadog::Propagator.new
+# ]
+# OpenTelemetry.propagation.http = OpenTelemetry::Context::Propagation::CompositePropagator.new(injectors, extractors)
 
 # To start a trace you need to get a Tracer from the TracerProvider
 tracer = OpenTelemetry.tracer_provider.tracer('my_app_or_gem', '0.1.0')
