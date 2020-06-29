@@ -1,3 +1,5 @@
+**[WARNING, THIS PROJECT IS EXPERIMENTAL AND UNDER ACTIVE DEVELOPMENT]**
+
 # opentelemetry-exporters-datadog
 
 The `opentelemetry-exporters-datadog` gem provides a Datadog exporter for OpenTelemetry for Ruby. Using `opentelemetry-exporters-datadog`, an application can configure OpenTelemetry to export collected tracing data to [Datadog][datadog-home].
