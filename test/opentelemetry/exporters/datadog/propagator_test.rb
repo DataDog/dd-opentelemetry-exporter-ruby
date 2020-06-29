@@ -1,10 +1,22 @@
 # frozen_string_literal: true
 
-# Copyright 2019 OpenTelemetry Authors
-#
-# SPDX-License-Identifier: Apache-2.0
+# Unless explicitly stated otherwise all files in this repository are licensed
+# under the Apache 2.0 license (see LICENSE).
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2020 Datadog, Inc.
 
 require 'test_helper'
+
+# Give access to otherwise private members
+module OpenTelemetry
+  class Context
+    module Propagation
+      class CompositePropagator
+        attr_accessor :injectors, :extractors
+      end
+    end
+  end
+end
 
 describe OpenTelemetry::Exporters::Datadog::Exporter do
   Span = OpenTelemetry::Trace::Span
@@ -151,6 +163,24 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
       _(context.span_id).must_equal(otel_span_id)
       _(context.trace_flags&.sampled?).must_equal(true)
       _(context.tracestate).must_equal(tracestate_header)
+    end
+  end
+
+  describe '#auto_configure' do
+    it 'includes datadog propagation in the http extractors and injectors' do
+      default_http_propagators = OpenTelemetry.propagation
+
+      OpenTelemetry::SDK.configure
+      OpenTelemetry::Exporters::Datadog::Propagator.auto_configure
+
+      # expect injects and extractors list to include datadog format
+      updated_extractors = default_http_propagators.http.extractors
+      updated_injectors = default_http_propagators.http.injectors
+
+      _(updated_injectors.length).must_equal(3)
+      _(updated_extractors.length).must_equal(3)
+      _(updated_injectors.map(&:class)).must_include(OpenTelemetry::Exporters::Datadog::Propagator)
+      _(updated_extractors.map(&:class)).must_include(OpenTelemetry::Exporters::Datadog::Propagator)
     end
   end
 end

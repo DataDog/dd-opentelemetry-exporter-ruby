@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Copyright 2019 OpenTelemetry Authors
-#
-# SPDX-License-Identifier: Apache-2.0
+# Unless explicitly stated otherwise all files in this repository are licensed
+# under the Apache 2.0 license (see LICENSE).
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2020 Datadog, Inc.
 
 require 'ddtrace/span'
 require 'ddtrace/ext/http'
@@ -78,11 +79,6 @@ module OpenTelemetry
                 end
               end
 
-              # set tags
-              span.attributes&.keys&.each do |attribute|
-                datadog_span.set_tag(attribute, span.attributes[attribute])
-              end
-
               # set default tags
               default_tags&.keys&.each do |attribute|
                 datadog_span.set_tag(attribute, span.attributes[attribute])
@@ -92,6 +88,11 @@ module OpenTelemetry
               datadog_span.set_tag(DD_ORIGIN, origin) if origin && parent_id.zero?
               datadog_span.set_tag(VERSION_KEY, version) if version && parent_id.zero?
               datadog_span.set_tag(ENV_KEY, env) if env
+
+              # set tags - takes precedence over env vars
+              span.attributes&.keys&.each do |attribute|
+                datadog_span.set_tag(attribute, span.attributes[attribute])
+              end
 
               sampling_rate = get_sampling_rate(span)
 
@@ -153,7 +154,7 @@ module OpenTelemetry
             # Get resource name for http related spans
             # TODO: how to handle resource naming for broader span types, ie db/cache/queue etc
 
-            if span.attributes.key?('http.method')
+            if span.attributes&.key?('http.method')
               route = span.attributes['http.route'] || span.attributes['http.target']
 
               return span.attributes['http.method'] + ' ' + route if route

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Copyright 2019 OpenTelemetry Authors
-#
-# SPDX-License-Identifier: Apache-2.0
+# Unless explicitly stated otherwise all files in this repository are licensed
+# under the Apache 2.0 license (see LICENSE).
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2020 Datadog, Inc.
 
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
@@ -12,12 +13,18 @@ require 'opentelemetry/exporters/datadog/version'
 Gem::Specification.new do |spec|
   spec.name        = 'opentelemetry-exporters-datadog'
   spec.version     = OpenTelemetry::Exporters::Datadog::VERSION
-  spec.authors     = ['OpenTelemetry Authors']
-  spec.email       = ['cncf-opentelemetry-contributors@lists.cncf.io']
+  spec.authors     = ['Datadog, Inc.']
+  spec.email       = ['dev@datadoghq.com']
 
   spec.summary     = 'Datadog trace exporter for the OpenTelemetry framework'
-  spec.description = 'Datadog trace exporter for the OpenTelemetry framework'
-  spec.homepage    = 'https://github.com/open-telemetry/opentelemetry-ruby'
+  spec.description = <<-DESC.gsub(/^[\s]+/, '')
+    opentelemetry-exporters-datadog is Datadog’s trace exporter for the OpenTelemetry
+    Ruby tracing library, which  is used to trace requests across web servers, databases
+    and microservices. The exporter formats and sends these traces to a Datadog Agent so
+    that they can be ingested, stored, and analyzed with Datadog.
+  DESC
+
+  spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-rubyy'
   spec.license     = 'Apache-2.0'
 
   spec.files = ::Dir.glob('lib/**/*.rb') +

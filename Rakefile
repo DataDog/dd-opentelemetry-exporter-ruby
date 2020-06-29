@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Copyright 2019 OpenTelemetry Authors
-#
-# SPDX-License-Identifier: Apache-2.0
+# Unless explicitly stated otherwise all files in this repository are licensed
+# under the Apache 2.0 license (see LICENSE).
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2020 Datadog, Inc.
 
 require 'bundler/gem_tasks'
 require 'rake/testtask'
@@ -14,8 +15,6 @@ RuboCop::RakeTask.new
 Rake::TestTask.new :test do |t|
   t.libs << 'test'
   t.libs << 'lib'
-  t.libs << '../../api/lib'
-  t.libs << '../../sdk/lib'
   t.test_files = FileList['test/**/*_test.rb']
 end
 
