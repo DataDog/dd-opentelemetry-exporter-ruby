@@ -1,0 +1,12 @@
+Component,Origin,License,Copyright
+gemfile, bundler, MIT, Portions copyright (c) 2010-2019 André Arko Portions copyright (c) 2009 Engine Yard
+gemfile, faraday, MIT, Copyright (c) 2009-2020 Rick Olson Zack Hobson
+gemfile, opentelemetry-api, Apache-2.0, Copyright 2020 OpenTelemetry Authors
+gemfile, opentelemetry-sdk, Apache-2.0, Copyright 2020 OpenTelemetry Authors
+gemfile, minitest, MIT, Copyright © Ryan Davis seattle.rb
+gemfile, rubocop, MIT, Copyright (c) 2012-19 Bozhidar Batsov
+gemfile, rake, MIT, Copyright (c) Jim Weirich
+gemfile, simplecov, MIT, Copyright (c) 2010-2017 Christoph Olszowka
+gemfile, webmock, MIT, Copyright (c) 2009-2010 Bartosz Blimke
+gemfile, yard, MIT, Copyright (c) 2007-2018 Loren Segal
+gemfile, yard-doctest, MIT, Copyright (c) 2007-2018 Loren Segal
