@@ -21,7 +21,7 @@ Generally, *libraries* that produce telemetry data should avoid depending direct
 - If you use [bundler][bundler-home], include the following in your `Gemfile`:
 
 ```
-gem 'opentelemetry-exporters-datadog', git: 'https://github.com/Datadog/dd-opentelemetry-ruby-exporter'
+gem 'opentelemetry-exporters-datadog', git: 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
 gem 'opentelemetry-api', git: 'https://github.com/open-telemetry/opentelemetry-ruby', ref: '0099668e9ad7eedf32bb496e135e8220f1e49c61'
 gem 'opentelemetry-sdk', git: 'https://github.com/open-telemetry/opentelemetry-ruby', ref: '0099668e9ad7eedf32bb496e135e8220f1e49c61'
 ```
