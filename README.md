@@ -22,8 +22,8 @@ Generally, *libraries* that produce telemetry data should avoid depending direct
 
 ```
 gem 'opentelemetry-exporters-datadog', git: 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
-gem 'opentelemetry-api', git: 'https://github.com/open-telemetry/opentelemetry-ruby', ref: '0099668e9ad7eedf32bb496e135e8220f1e49c61'
-gem 'opentelemetry-sdk', git: 'https://github.com/open-telemetry/opentelemetry-ruby', ref: '0099668e9ad7eedf32bb496e135e8220f1e49c61'
+gem 'opentelemetry-api', '~> 0.5'
+gem 'opentelemetry-sdk', '~> 0.5'
 ```
 
 - Then, configure the SDK to use the Datadog exporter as a span processor, and use the OpenTelemetry interfaces to produces traces and other information. Following is a basic example.

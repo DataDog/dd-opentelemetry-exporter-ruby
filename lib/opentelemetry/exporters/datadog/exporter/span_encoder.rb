@@ -33,15 +33,16 @@ module OpenTelemetry
           TRUNCATION_HELPER = ::Datadog::DistributedTracing::Headers::Headers.new({})
 
           INSTRUMENTATION_SPAN_TYPES = {
-            'OpenTelemetry::Adapters::Ethon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Excon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Faraday' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Net::HTTP' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Rack' => ::Datadog::Ext::HTTP::TYPE_INBOUND,
-            'OpenTelemetry::Adapters::Redis' => ::Datadog::Contrib::Redis::Ext::TYPE,
-            'OpenTelemetry::Adapters::RestClient' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Sidekiq' => ::Datadog::Ext::AppTypes::WORKER,
-            'OpenTelemetry::Adapters::Sinatra' => ::Datadog::Ext::HTTP::TYPE_INBOUND
+            'OpenTelemetry::Instrumentation::Ethon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Excon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Faraday' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Mysql2' => ::Datadog::Ext::SQL::TYPE,
+            'OpenTelemetry::Instrumentation::Net::HTTP' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Rack' => ::Datadog::Ext::HTTP::TYPE_INBOUND,
+            'OpenTelemetry::Instrumentation::Redis' => ::Datadog::Contrib::Redis::Ext::TYPE,
+            'OpenTelemetry::Instrumentation::RestClient' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Sidekiq' => ::Datadog::Ext::AppTypes::WORKER,
+            'OpenTelemetry::Instrumentation::Sinatra' => ::Datadog::Ext::HTTP::TYPE_INBOUND
           }.freeze
 
           def translate_to_datadog(otel_spans, service, env = nil, version = nil, tags = nil) # rubocop:disable Metrics/AbcSize
