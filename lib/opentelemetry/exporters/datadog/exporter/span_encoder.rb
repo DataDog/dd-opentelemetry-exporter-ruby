@@ -7,6 +7,7 @@
 
 require 'ddtrace/span'
 require 'ddtrace/ext/http'
+require 'ddtrace/ext/sql'
 require 'ddtrace/ext/app_types'
 require 'ddtrace/contrib/redis/ext'
 require 'opentelemetry/trace/status'
