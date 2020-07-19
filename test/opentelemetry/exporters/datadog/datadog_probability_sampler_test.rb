@@ -61,6 +61,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogProbabilitySampler do
     it 'records but does not sample according to the rate between [0.0-1.0]' do
       activate_trace_config OpenTelemetry::SDK::Trace::Config::TraceConfig.new(sampler: datadog_probability_sampler.default_with_probability(0.0))
       spans = []
+
       100.times do
         spans << tracer.start_root_span('root')
       end

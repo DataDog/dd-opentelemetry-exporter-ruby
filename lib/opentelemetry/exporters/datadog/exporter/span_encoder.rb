@@ -116,9 +116,9 @@ module OpenTelemetry
           private
 
           def get_trace_ids(span)
-            trace_id = int64(span.trace_id, 16)
-            span_id = int64(span.span_id, 16)
-            parent_id = int64(span.parent_span_id, 16) || 0
+            trace_id = int64(span.trace_id.unpack1('H*'), 16)
+            span_id = int64(span.span_id.unpack1('H*'), 16)
+            parent_id = span.parent_span_id ? int64(span.parent_span_id.unpack1('H*'), 16) || 0 : 0
 
             [trace_id, span_id, parent_id]
           rescue StandardError => e

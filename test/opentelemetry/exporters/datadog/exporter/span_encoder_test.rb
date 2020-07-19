@@ -68,7 +68,7 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     start_times = [base_time, base_time + 150 * 10**6, base_time + 300 * 10**6]
     durations = [50 * 10**6, 100 * 10**6, 200 * 10**6]
     end_times = [start_times[0] + durations[0], start_times[1] + durations[1], start_times[2] + durations[2]]
-    instrumentation_library = OpenTelemetry::SDK::InstrumentationLibrary.new('OpenTelemetry::Adapters::Redis', 1)
+    instrumentation_library = OpenTelemetry::SDK::InstrumentationLibrary.new('OpenTelemetry::Instrumentation::Redis', 1)
 
     span_context = OpenTelemetry::Trace::SpanContext.new(trace_id: trace_id, span_id: span_id)
     parent_context = OpenTelemetry::Trace::SpanContext.new(trace_id: trace_id, span_id: parent_id, tracestate: '_dd_origin=synthetics-example')
@@ -97,10 +97,12 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     # check origin tag exists on parent only
     _(datadog_encoded_spans[0].get_tag('_dd_origin')).must_equal('synthetics-example')
     assert_nil(datadog_encoded_spans[1].get_tag('_dd_origin'))
+    assert(!datadog_encoded_spans[0].trace_id.nil?)
+    assert(!datadog_encoded_spans[0].span_id.nil?)
   end
 
   it 'generates a valid datadog span type' do
-    instrumentation_library = OpenTelemetry::SDK::InstrumentationLibrary.new('OpenTelemetry::Adapters::Redis', 1)
+    instrumentation_library = OpenTelemetry::SDK::InstrumentationLibrary.new('OpenTelemetry::Instrumentation::Redis', 1)
 
     span_data = create_span_data(instrumentation_library: instrumentation_library)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')

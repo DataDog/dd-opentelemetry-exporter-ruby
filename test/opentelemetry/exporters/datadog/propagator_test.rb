@@ -91,25 +91,25 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
 
   let(:tracestate_header) { '_dd_origin=example_origin' }
   let(:context) do
-    span_context = SpanContext.new(trace_id: otel_trace_id, span_id: otel_span_id)
+    span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'))
     span = Span.new(span_context: span_context)
     ::OpenTelemetry::Context.empty.set_value(current_span_key, span)
   end
   let(:context_with_tracestate) do
-    span_context = SpanContext.new(trace_id: otel_trace_id, span_id: otel_span_id,
+    span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'),
                                    tracestate: tracestate_header)
     span = Span.new(span_context: span_context)
     OpenTelemetry::Context.empty.set_value(current_span_key, span)
   end
 
   let(:context_with_trace_flags) do
-    span_context = SpanContext.new(trace_id: otel_trace_id, span_id: otel_span_id, trace_flags: trace_flags)
+    span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'), trace_flags: trace_flags)
     span = Span.new(span_context: span_context)
     OpenTelemetry::Context.empty.set_value(current_span_key, span)
   end
 
   let(:context_without_current_span) do
-    span_context = SpanContext.new(trace_id: 'f' * 32, span_id: '1' * 16,
+    span_context = SpanContext.new(trace_id: Array('f' * 32).pack('H*'), span_id: Array('1' * 16).pack('H*'),
                                    tracestate: tracestate_header)
     OpenTelemetry::Context.empty.set_value(extracted_span_context_key, span_context)
   end
@@ -150,8 +150,8 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
     it 'returns a remote SpanContext with fields from the datadog headers' do
       context = propagator.extract(valid_dd_headers, OpenTelemetry::Context.empty)[extracted_span_context_key]
 
-      _(context.trace_id).must_equal(otel_trace_id[0, 16])
-      _(context.span_id).must_equal(otel_span_id)
+      _(context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
+      _(context.span_id.unpack1('H*')).must_equal(otel_span_id)
       _(context.trace_flags&.sampled?).must_equal(true)
       _(context.tracestate).must_equal(tracestate_header)
     end
@@ -159,8 +159,8 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
     it 'accounts for rack specific headers' do
       context = propagator.extract(rack_dd_headers, OpenTelemetry::Context.empty)[extracted_span_context_key]
 
-      _(context.trace_id).must_equal(otel_trace_id[0, 16])
-      _(context.span_id).must_equal(otel_span_id)
+      _(context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
+      _(context.span_id.unpack1('H*')).must_equal(otel_span_id)
       _(context.trace_flags&.sampled?).must_equal(true)
       _(context.tracestate).must_equal(tracestate_header)
     end
