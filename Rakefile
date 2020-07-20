@@ -34,15 +34,16 @@ end
 #       require './lib/opentelemetry/exporters/datadog/version.rb'
 #       OpenTelemetry::Exporters::Datadog::VERSION
 #     }
-#   }	
+#   }
 # }
 
 # Deploy tasks
-S3_BUCKET = 'gems.datadoghq.com'.freeze
+S3_BUCKET = 'gems.datadoghq.com'
 S3_DIR = ENV['S3_DIR']
 
 task :'release:gem' do
   raise 'Missing environment variable S3_DIR' if !S3_DIR || S3_DIR.empty?
+
   # load existing deployed gems
   sh "aws s3 cp --exclude 'docs/*' --recursive s3://#{S3_BUCKET}/#{S3_DIR}/ ./rubygems/"
 
