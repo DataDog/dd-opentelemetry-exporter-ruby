@@ -105,5 +105,5 @@ workflows:
             - test-ruby25
             - test-ruby26
             - test-ruby27
-            - jruby
-            - jruby92
+            - test-jruby
+            - test-jruby92
