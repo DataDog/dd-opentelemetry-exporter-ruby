@@ -7,6 +7,7 @@
 
 require 'ddtrace/span'
 require 'ddtrace/ext/http'
+require 'ddtrace/ext/sql'
 require 'ddtrace/ext/app_types'
 require 'ddtrace/contrib/redis/ext'
 require 'opentelemetry/trace/status'
@@ -33,15 +34,16 @@ module OpenTelemetry
           TRUNCATION_HELPER = ::Datadog::DistributedTracing::Headers::Headers.new({})
 
           INSTRUMENTATION_SPAN_TYPES = {
-            'OpenTelemetry::Adapters::Ethon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Excon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Faraday' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Net::HTTP' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Rack' => ::Datadog::Ext::HTTP::TYPE_INBOUND,
-            'OpenTelemetry::Adapters::Redis' => ::Datadog::Contrib::Redis::Ext::TYPE,
-            'OpenTelemetry::Adapters::RestClient' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
-            'OpenTelemetry::Adapters::Sidekiq' => ::Datadog::Ext::AppTypes::WORKER,
-            'OpenTelemetry::Adapters::Sinatra' => ::Datadog::Ext::HTTP::TYPE_INBOUND
+            'OpenTelemetry::Instrumentation::Ethon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Excon' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Faraday' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Mysql2' => ::Datadog::Ext::SQL::TYPE,
+            'OpenTelemetry::Instrumentation::Net::HTTP' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Rack' => ::Datadog::Ext::HTTP::TYPE_INBOUND,
+            'OpenTelemetry::Instrumentation::Redis' => ::Datadog::Contrib::Redis::Ext::TYPE,
+            'OpenTelemetry::Instrumentation::RestClient' => ::Datadog::Ext::HTTP::TYPE_OUTBOUND,
+            'OpenTelemetry::Instrumentation::Sidekiq' => ::Datadog::Ext::AppTypes::WORKER,
+            'OpenTelemetry::Instrumentation::Sinatra' => ::Datadog::Ext::HTTP::TYPE_INBOUND
           }.freeze
 
           def translate_to_datadog(otel_spans, service, env = nil, version = nil, tags = nil) # rubocop:disable Metrics/AbcSize
@@ -115,9 +117,9 @@ module OpenTelemetry
           private
 
           def get_trace_ids(span)
-            trace_id = int64(span.trace_id, 16)
-            span_id = int64(span.span_id, 16)
-            parent_id = int64(span.parent_span_id, 16) || 0
+            trace_id = int64(span.trace_id.unpack1('H*'), 16)
+            span_id = int64(span.span_id.unpack1('H*'), 16)
+            parent_id = span.parent_span_id ? int64(span.parent_span_id.unpack1('H*'), 16) || 0 : 0
 
             [trace_id, span_id, parent_id]
           rescue StandardError => e

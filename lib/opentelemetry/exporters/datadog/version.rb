@@ -9,7 +9,7 @@ module OpenTelemetry
   module Exporters
     module Datadog
       ## Current OpenTelemetry Datadog exporter version
-      VERSION = '0.4.0'
+      VERSION = '0.5.0'
     end
   end
 end

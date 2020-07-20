@@ -53,8 +53,8 @@ module OpenTelemetry
 
           origin = get_origin_string(span_context.tracestate)
           setter ||= DEFAULT_SETTER
-          setter.call(carrier, PARENT_ID_KEY, @truncation_helper.value_to_id(span_context.span_id, 16).to_s)
-          setter.call(carrier, TRACE_ID_KEY, @truncation_helper.value_to_id(span_context.trace_id, 16).to_s)
+          setter.call(carrier, PARENT_ID_KEY, @truncation_helper.value_to_id(span_context.span_id.unpack1('H*'), 16).to_s)
+          setter.call(carrier, TRACE_ID_KEY, @truncation_helper.value_to_id(span_context.trace_id.unpack1('H*'), 16).to_s)
           setter.call(carrier, SAMPLING_PRIORITY_KEY, sampled.to_s)
           setter.call(carrier, ORIGIN_KEY, origin) if origin
 
@@ -86,8 +86,8 @@ module OpenTelemetry
 
           return context if trace_id.nil? || span_id.nil?
 
-          span_context = Trace::SpanContext.new(trace_id: trace_id.to_i.to_s(16),
-                                                span_id: span_id.to_i.to_s(16),
+          span_context = Trace::SpanContext.new(trace_id: Array(trace_id.to_i.to_s(16)).pack('H*'),
+                                                span_id: Array(span_id.to_i.to_s(16)).pack('H*'),
                                                 trace_flags: OpenTelemetry::Trace::TraceFlags.from_byte(is_sampled),
                                                 tracestate: tracestate,
                                                 remote: true)
