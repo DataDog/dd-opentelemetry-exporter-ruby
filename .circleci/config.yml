@@ -20,17 +20,6 @@ executors:
     environment:
       JRUBY_OPTS: "--debug"
 
-step_bundle_install: &step_bundle_install
-  run:
-    name: Install gem dependencies
-    command: bundle install
-filters_only_release_tags: &filters_only_release_tags
-  filters:
-    branches:
-      ignore: /.*/
-    tags:
-      only: /^v\d+(\.\d+){0,3}(\.(alpha|beta|rc)\d+)?$/
-
 commands:
   rake-test:
     steps:
@@ -72,7 +61,9 @@ jobs:
           command: |
             apt-get -y -qq update
             apt-get -y -qq install awscli
-      - *step_bundle_install
+      - run:
+          name: Install gem dependencies
+          command: bundle install
       - run:
           name: Upload release Gem and rebuild index
           command: S3_DIR=otel-release bundle exec rake release:gem
@@ -105,10 +96,14 @@ workflows:
             tags:
               only: /^opentelemetry-.+\/v\d.*$/
       - "deploy release":
-        <<: *filters_only_release_tags
-        requires:
-          - test-ruby25
-          - test-ruby26
-          - test-ruby27
-          - jruby
-          - jruby92
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+(\.\d+){0,3}(\.(alpha|beta|rc)\d+)?$/        
+          requires:
+            - test-ruby25
+            - test-ruby26
+            - test-ruby27
+            - jruby
+            - jruby92
