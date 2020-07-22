@@ -6,7 +6,7 @@ Community contributions to the Datadog Opentelemetry Exporter library for Ruby a
 
 Many great ideas for new features come from the community, and we'd be happy to consider yours!
 
-To share your request, you can [open a Github issue](https://github.com/DataDog/dd-trace-rb/issues/new) with the details about what you'd like to see. At a minimum, please provide:
+To share your request, you can [open a Github issue](https://github.com/DataDog/dd-opentelemetry-exoprter-ruby/issues/new) with the details about what you'd like to see. At a minimum, please provide:
 
  - The goal of the new feature
  - A description of how it might be used or behave
