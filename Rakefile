@@ -28,35 +28,35 @@ else
   task default: %i[test rubocop yard]
 end
 
-# Deploy tasks
-S3_BUCKET = 'gems.datadoghq.com'
-S3_DIR = ENV['S3_DIR']
+# # Deploy tasks
+# S3_BUCKET = 'gems.datadoghq.com'
+# S3_DIR = ENV['S3_DIR']
 
-task :'release:gem' do
-  raise 'Missing environment variable S3_DIR' if !S3_DIR || S3_DIR.empty?
+# task :'release:gem' do
+#   raise 'Missing environment variable S3_DIR' if !S3_DIR || S3_DIR.empty?
 
-  # load existing deployed gems
-  sh "aws s3 cp --exclude 'docs/*' --recursive s3://#{S3_BUCKET}/#{S3_DIR}/ ./rubygems/"
+#   # load existing deployed gems
+#   sh "aws s3 cp --exclude 'docs/*' --recursive s3://#{S3_BUCKET}/#{S3_DIR}/ ./rubygems/"
 
-  # create folders
-  sh 'mkdir -p ./gems'
-  sh 'mkdir -p ./rubygems/gems'
+#   # create folders
+#   sh 'mkdir -p ./gems'
+#   sh 'mkdir -p ./rubygems/gems'
 
-  # build the gem
-  Rake::Task['build'].execute
+#   # build the gem
+#   Rake::Task['build'].execute
 
-  # copy the output in the indexed folder
-  sh 'cp pkg/*.gem ./rubygems/gems/'
+#   # copy the output in the indexed folder
+#   sh 'cp pkg/*.gem ./rubygems/gems/'
 
-  # generate the gems index
-  sh 'gem generate_index -v --no-modern -d ./rubygems'
+#   # generate the gems index
+#   sh 'gem generate_index -v --no-modern -d ./rubygems'
 
-  # remove all local repository gems to limit files needed to be uploaded
-  sh 'rm -f ./rubygems/gems/*'
+#   # remove all local repository gems to limit files needed to be uploaded
+#   sh 'rm -f ./rubygems/gems/*'
 
-  # re-add new gems
-  sh 'cp pkg/*.gem ./rubygems/gems/'
+#   # re-add new gems
+#   sh 'cp pkg/*.gem ./rubygems/gems/'
 
-  # deploy a static gem registry
-  sh "aws s3 cp --recursive ./rubygems/ s3://#{S3_BUCKET}/#{S3_DIR}/"
-end
+#   # deploy a static gem registry
+#   sh "aws s3 cp --recursive ./rubygems/ s3://#{S3_BUCKET}/#{S3_DIR}/"
+# end

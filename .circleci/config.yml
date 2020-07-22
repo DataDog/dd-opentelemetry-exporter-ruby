@@ -95,15 +95,15 @@ workflows:
           filters:
             tags:
               only: /^opentelemetry-.+\/v\d.*$/
-      - "deploy release":
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v\d+(\.\d+){0,3}(\.(alpha|beta|rc)\d+)?$/        
-          requires:
-            - test-ruby25
-            - test-ruby26
-            - test-ruby27
-            - test-jruby
-            - test-jruby92
+      # - "deploy release":
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /^v\d+(\.\d+){0,3}(\.(alpha|beta|rc)\d+)?$/        
+      #     requires:
+      #       - test-ruby25
+      #       - test-ruby26
+      #       - test-ruby27
+      #       - test-jruby
+      #       - test-jruby92
