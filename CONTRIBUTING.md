@@ -6,7 +6,7 @@ Community contributions to the Datadog Opentelemetry Exporter library for Ruby a
 
 Many great ideas for new features come from the community, and we'd be happy to consider yours!
 
-To share your request, you can [open a Github issue](https://github.com/DataDog/dd-trace-rb/issues/new) with the details about what you'd like to see. At a minimum, please provide:
+To share your request, you can [open a Github issue](https://github.com/DataDog/dd-opentelemetry-exporter-ruby/issues/new) with the details about what you'd like to see. At a minimum, please provide:
 
  - The goal of the new feature
  - A description of how it might be used or behave
@@ -25,7 +25,7 @@ Additionally, if you can, include:
 
 For any urgent matters (such as outages) or issues concerning the Datadog service or UI, contact our support team via https://docs.datadoghq.com/help/ for direct, faster assistance.
 
-You may submit bug reports concerning the Datadog OpenTelemetry Exporter for Ruby by [opening a Github issue](https://github.com/DataDog/dd-opentelemetry-exporters-ruby/issues/new). At a minimum, please provide:
+You may submit bug reports concerning the Datadog OpenTelemetry Exporter for Ruby by [opening a Github issue](https://github.com/DataDog/dd-opentelemetry-exporter-ruby/issues/new). At a minimum, please provide:
 
  - A description of the problem
  - Steps to reproduce
@@ -49,9 +49,9 @@ Reports that include rich detail are better, and ones with code that reproduce t
 
 ## Have a patch?
 
-We welcome code contributions to the library, which you can [submit as a pull request](https://github.com/DataDog/dd-opentelemetry-exporters-ruby/pull/new/master). To create a pull request:
+We welcome code contributions to the library, which you can [submit as a pull request](https://github.com/DataDog/dd-opentelemetry-exporter-ruby/pull/new/master). To create a pull request:
 
-1. **Fork the repository** from https://github.com/DataDog/dd-opentelemetry-exporters-ruby
+1. **Fork the repository** from https://github.com/DataDog/dd-opentelemetry-exporter-ruby
 2. **Make any changes** for your patch.
 3. **Write tests** that demonstrate how the feature works or how the bug is fixed.
 4. **Update any documentation** such as `README.md`, especially for new features.

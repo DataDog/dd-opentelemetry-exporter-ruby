@@ -26,6 +26,14 @@ gem 'opentelemetry-api', '~> 0.5'
 gem 'opentelemetry-sdk', '~> 0.5'
 ```
 
+- Or install the gem directly using:
+
+```
+gem install opentelemetry-api
+gem install opentelemetry-sdk
+gem install opentelemetry-exporters-datadog
+```
+
 - Then, configure the SDK to use the Datadog exporter as a span processor, and use the OpenTelemetry interfaces to produces traces and other information. Following is a basic example.
 
 ```ruby
