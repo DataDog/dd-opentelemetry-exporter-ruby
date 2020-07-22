@@ -160,6 +160,5 @@ The `opentelemetry-exporters-datadog` gem is distributed under the Apache 2.0 li
 [datadog-home]: https://www.datadoghq.com
 [opentelemetry-home]: https://opentelemetry.io
 [bundler-home]: https://bundler.io
-[repo-github]: https://github.com/open-telemetry/opentelemetry-ruby
 [license-github]: https://github.com/DataDog/dd-opentelemetry-exporter-ruby/blob/master/LICENSE
 [examples-github]: https://github.com/open-telemetry/opentelemetry-ruby/tree/master/examples
