@@ -21,7 +21,7 @@ Generally, *libraries* that produce telemetry data should avoid depending direct
 - If you use [bundler][bundler-home], include the following in your `Gemfile`:
 
 ```
-gem 'opentelemetry-exporters-datadog', git: 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
+gem 'opentelemetry-exporters-datadog'
 gem 'opentelemetry-api', '~> 0.5'
 gem 'opentelemetry-sdk', '~> 0.5'
 ```
@@ -154,7 +154,7 @@ Tags can also be set directly on individual spans, which will supersede any conf
 
 ## License
 
-The `opentelemetry-exporter-datadog` gem is distributed under the Apache 2.0 license. See [LICENSE][license-github] for more information.
+The `opentelemetry-exporters-datadog` gem is distributed under the Apache 2.0 license. See [LICENSE][license-github] for more information.
 
 
 [datadog-home]: https://www.datadoghq.com

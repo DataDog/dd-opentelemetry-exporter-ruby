@@ -28,15 +28,6 @@ else
   task default: %i[test rubocop yard]
 end
 
-# GEM_INFO = {
-#   "opentelemetry-exporters-datadog" => {
-#     version_getter: ->() {
-#       require './lib/opentelemetry/exporters/datadog/version.rb'
-#       OpenTelemetry::Exporters::Datadog::VERSION
-#     }
-#   }
-# }
-
 # Deploy tasks
 S3_BUCKET = 'gems.datadoghq.com'
 S3_DIR = ENV['S3_DIR']
