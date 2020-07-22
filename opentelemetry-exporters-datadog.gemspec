@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
     that they can be ingested, stored, and analyzed with Datadog.
   DESC
 
-  spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-rubyy'
+  spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
   spec.license     = 'Apache-2.0'
 
   spec.files = ::Dir.glob('lib/**/*.rb') +
