@@ -19,6 +19,7 @@ executors:
       - image: "circleci/jruby:9.2.8-jre"
     environment:
       JRUBY_OPTS: "--debug"
+
 commands:
   rake-test:
     steps:
@@ -29,6 +30,7 @@ commands:
       - run:
           name: CI (Datadog)
           command: "bundle exec rake"
+
 jobs:
   test-ruby25:
     executor: ruby25
@@ -50,6 +52,25 @@ jobs:
     executor: jruby92
     steps:
       - rake-test
+  "deploy release":
+    executor: ruby27
+    steps:
+      - checkout
+      - run:
+          name: Install AWS CLI
+          command: |
+            apt-get -y -qq update
+            apt-get -y -qq install awscli
+      - run:
+          name: Install gem dependencies
+          command: bundle install
+      - run:
+          name: Upload release Gem and rebuild index
+          command: S3_DIR=otel-release bundle exec rake release:gem
+      - store_artifacts:
+          path: pkg/
+          destination: gem
+
 workflows:
   version: 2
   builds:
@@ -74,3 +95,15 @@ workflows:
           filters:
             tags:
               only: /^opentelemetry-.+\/v\d.*$/
+      # - "deploy release":
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /^v\d+(\.\d+){0,3}(\.(alpha|beta|rc)\d+)?$/        
+      #     requires:
+      #       - test-ruby25
+      #       - test-ruby26
+      #       - test-ruby27
+      #       - test-jruby
+      #       - test-jruby92
