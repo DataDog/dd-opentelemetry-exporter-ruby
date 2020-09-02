@@ -144,7 +144,21 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     _(datadog_span_info.to_hash[:metrics]['_sample_rate']).must_equal(-1)
   end
 
-  def create_span_data(attributes: nil, events: nil, links: nil, trace_id: OpenTelemetry::Trace.generate_trace_id, trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT, status: nil, instrumentation_library: nil)
+  it 'sets the resource labels as tags but not service.name' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_labels = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(labels: otel_resource_labels)
+
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('service.version')).must_equal('v1') 
+    _(datadog_span_info.get_tag('other_info')).must_equal('arbitrary_tag') 
+  end  
+
+  def create_span_data(attributes: nil, events: nil, links: nil, trace_id: OpenTelemetry::Trace.generate_trace_id, trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT, status: nil, instrumentation_library: nil, resource: nil)
     OpenTelemetry::SDK::Trace::SpanData.new(
       'example_name',
       nil,
@@ -159,11 +173,15 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
       attributes,
       links,
       events,
-      nil,
+      resource,
       instrumentation_library,
       OpenTelemetry::Trace.generate_span_id,
       trace_id,
       trace_flags
     )
+  end
+
+  def create_resource(labels: {})
+    OpenTelemetry::SDK::Resources::Resource.create(labels)
   end
 end

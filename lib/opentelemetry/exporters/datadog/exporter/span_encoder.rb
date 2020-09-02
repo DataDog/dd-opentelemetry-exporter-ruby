@@ -56,6 +56,12 @@ module OpenTelemetry
               span_type = get_span_type(span)
               span_name = get_span_name(span)
 
+              #this excludes service.name, which we get seperately
+              span_resource_tags = get_span_resource_tags(span)
+
+              default_tags_including_resource = default_tags.merge(span_resource_tags)
+
+
               datadog_span = ::Datadog::Span.new(nil, span_name,
                                                  service: service,
                                                  trace_id: trace_id,
@@ -82,8 +88,8 @@ module OpenTelemetry
               end
 
               # set default tags
-              default_tags&.keys&.each do |attribute|
-                datadog_span.set_tag(attribute, span.attributes[attribute])
+              default_tags_including_resource&.keys&.each do |attribute|
+                datadog_span.set_tag(attribute, default_tags_including_resource[attribute])
               end
 
               origin = get_origin_string(span)
@@ -181,6 +187,15 @@ module OpenTelemetry
             instrumentation_name && kind ? "#{instrumentation_name.to_s.gsub(':', '_')}.#{kind}" : span.name
           rescue NoMethodError
             span.name
+          end
+
+          def get_span_resource_tags(span)
+            # this is open to change in new versions so being extra defensive here
+            return {} unless (resource_labels = span.library_resource.label_enumerator.to_h rescue nil) ||
+              (resource_labels = span.library_resource.label_enumerator.to_h rescue nil)
+
+            # lets grab service name seperately since it has significance
+            resource_labels.select{ |rlabel_key, _rlabel_value| rlabel_key != 'service.name'}
           end
 
           def get_origin_string(span)
