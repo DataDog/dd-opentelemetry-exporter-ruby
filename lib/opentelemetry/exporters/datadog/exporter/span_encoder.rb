@@ -56,14 +56,13 @@ module OpenTelemetry
               span_type = get_span_type(span)
               span_name = get_span_name(span)
 
-              #this excludes service.name, which we get seperately
-              span_resource_tags = get_span_resource_tags(span)
+              # this excludes service.name, which we get seperately
+              span_resource_tags, resource_service_name = get_resource_tags_and_service(span)
 
               default_tags_including_resource = default_tags.merge(span_resource_tags)
 
-
               datadog_span = ::Datadog::Span.new(nil, span_name,
-                                                 service: service,
+                                                 service: resource_service_name || service,
                                                  trace_id: trace_id,
                                                  parent_id: parent_id,
                                                  resource: get_resource(span),
@@ -189,13 +188,31 @@ module OpenTelemetry
             span.name
           end
 
-          def get_span_resource_tags(span)
+          def get_resource_tags_and_service(span)
+            resource_tags = {}
+            service_name = nil
             # this is open to change in new versions so being extra defensive here
-            return {} unless (resource_labels = span.library_resource.label_enumerator.to_h rescue nil) ||
-              (resource_labels = span.library_resource.label_enumerator.to_h rescue nil)
+            return resource_tags unless (resource_labels = begin
+                                                             span.library_resource.label_enumerator.to_h
+                                                           rescue StandardError
+                                                             nil
+                                                           end) ||
+                                        (resource_labels = begin
+                                   span.library_resource.label_enumerator.to_h
+                                                           rescue StandardError
+                                                             nil
+                                 end)
 
-            # lets grab service name seperately since it has significance
-            resource_labels.select{ |rlabel_key, _rlabel_value| rlabel_key != 'service.name'}
+            # grab service name seperately since it has significance
+            resource_labels.each do |rlabel_key, rlabel_value|
+              if rlabel_key == 'service.name'
+                service_name = rlabel_value
+              else
+                resource_tags[rlabel_key] = rlabel_value
+              end
+            end
+
+            [resource_tags, service_name]
           end
 
           def get_origin_string(span)

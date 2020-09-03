@@ -149,14 +149,37 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     otel_resource_labels = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
     otel_resource = create_resource(labels: otel_resource_labels)
 
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('service.version')).must_equal('v1')
+    _(datadog_span_info.get_tag('other_info')).must_equal('arbitrary_tag')
+  end
+
+  it 'sets the resource labels service.name as span service if it exists' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_labels = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(labels: otel_resource_labels)
 
     span_data = create_span_data(attributes: attributes, resource: otel_resource)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
     datadog_span_info = encoded_spans[0]
 
-    _(datadog_span_info.get_tag('service.version')).must_equal('v1') 
-    _(datadog_span_info.get_tag('other_info')).must_equal('arbitrary_tag') 
-  end  
+    _(datadog_span_info.service).must_equal('resource_defined_service')
+  end
+
+  it 'defaults to user provided service name if the resource labels service.name does not exist' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_labels = { 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(labels: otel_resource_labels)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.service).must_equal('example_service')
+  end
 
   def create_span_data(attributes: nil, events: nil, links: nil, trace_id: OpenTelemetry::Trace.generate_trace_id, trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT, status: nil, instrumentation_library: nil, resource: nil)
     OpenTelemetry::SDK::Trace::SpanData.new(
