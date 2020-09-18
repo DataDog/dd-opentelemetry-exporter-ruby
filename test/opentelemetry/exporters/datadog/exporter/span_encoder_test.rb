@@ -144,10 +144,10 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     _(datadog_span_info.to_hash[:metrics]['_sample_rate']).must_equal(-1)
   end
 
-  it 'sets the resource labels as tags but not service.name' do
+  it 'sets the resource attributes as tags but not service.name' do
     attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
-    otel_resource_labels = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
-    otel_resource = create_resource(labels: otel_resource_labels)
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
 
     span_data = create_span_data(attributes: attributes, resource: otel_resource)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
@@ -157,10 +157,10 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     _(datadog_span_info.get_tag('other_info')).must_equal('arbitrary_tag')
   end
 
-  it 'sets the resource labels service.name as span service if it exists' do
+  it 'sets the resource attributes service.name as span service if it exists' do
     attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
-    otel_resource_labels = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
-    otel_resource = create_resource(labels: otel_resource_labels)
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
 
     span_data = create_span_data(attributes: attributes, resource: otel_resource)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
@@ -169,10 +169,10 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     _(datadog_span_info.service).must_equal('resource_defined_service')
   end
 
-  it 'defaults to user provided service name if the resource labels service.name does not exist' do
+  it 'defaults to user provided service name if the resource attributes service.name does not exist' do
     attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
-    otel_resource_labels = { 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
-    otel_resource = create_resource(labels: otel_resource_labels)
+    otel_resource_attributes = { 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
 
     span_data = create_span_data(attributes: attributes, resource: otel_resource)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
@@ -204,7 +204,7 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     )
   end
 
-  def create_resource(labels: {})
-    OpenTelemetry::SDK::Resources::Resource.create(labels)
+  def create_resource(attributes: {})
+    OpenTelemetry::SDK::Resources::Resource.create(attributes)
   end
 end

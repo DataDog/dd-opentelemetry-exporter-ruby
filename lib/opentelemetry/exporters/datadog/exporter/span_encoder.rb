@@ -192,23 +192,18 @@ module OpenTelemetry
             resource_tags = {}
             service_name = nil
             # this is open to change in new versions so being extra defensive here
-            return resource_tags unless (resource_labels = begin
-                                                             span.library_resource.label_enumerator.to_h
-                                                           rescue StandardError
-                                                             nil
-                                                           end) ||
-                                        (resource_labels = begin
-                                   span.library_resource.label_enumerator.to_h
-                                                           rescue StandardError
-                                                             nil
-                                 end)
+            return resource_tags unless (resource_attributes = begin
+                                                                 span.resource.attribute_enumerator.to_h
+                                                               rescue StandardError
+                                                                 nil
+                                                               end)
 
             # grab service name seperately since it has significance
-            resource_labels.each do |rlabel_key, rlabel_value|
-              if rlabel_key == 'service.name'
-                service_name = rlabel_value
+            resource_attributes.each do |rattribute_key, rattribute_value|
+              if rattribute_key == 'service.name'
+                service_name = rattribute_value
               else
-                resource_tags[rlabel_key] = rlabel_value
+                resource_tags[rattribute_key] = rattribute_value
               end
             end
 
