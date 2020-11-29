@@ -68,7 +68,7 @@ module OpenTelemetry
 
         # Called when {TracerProvider#shutdown} is called, if this exporter is
         # registered to a {TracerProvider} object.
-        def shutdown
+        def shutdown(timeout: nil)
           @shutdown = true
         end
 

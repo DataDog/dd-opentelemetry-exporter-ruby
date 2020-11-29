@@ -135,7 +135,7 @@ module OpenTelemetry
 
         # shuts the consumer thread down and flushes the current accumulated buffer
         # will block until the thread is finished
-        def shutdown
+        def shutdown(timeout: nil)
           lock do
             @keep_running = false
             @condition.signal
