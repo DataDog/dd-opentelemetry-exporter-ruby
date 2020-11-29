@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-require 'opentelemetry/sdk'
+require 'opentelemetry'
 require 'opentelemetry/context/propagation'
 require 'ddtrace/distributed_tracing/headers/headers'
 require 'ddtrace/distributed_tracing/headers/helpers'

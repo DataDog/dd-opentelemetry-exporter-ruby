@@ -5,19 +5,27 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2020 Datadog, Inc.
 
-require 'opentelemetry/sdk/trace/samplers/trace_id_ratio_based'
-require 'opentelemetry/sdk/trace/samplers/decision'
-require 'opentelemetry/sdk/trace/samplers/result'
-
 module OpenTelemetry
   module Exporters
     module Datadog
       # Implements sampling based on a probability but records all spans regardless.
-      class DatadogProbabilitySampler < OpenTelemetry::SDK::Trace::Samplers::TraceIdRatioBased
-        RECORD_AND_SAMPLE = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLE)
-        RECORD_ONLY = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_ONLY)
+      class DatadogProbabilitySampler
+        attr_reader :description
+
+        RECORD_AND_SAMPLE = Datadog::Result.new(decision: Datadog::Decision::RECORD_AND_SAMPLE)
+        RECORD_ONLY = Datadog::Result.new(decision: Datadog::Decision::RECORD_ONLY)
 
         private_constant(:RECORD_AND_SAMPLE, :RECORD_ONLY)
+
+        def initialize(probability)
+          @probability = probability
+          @id_upper_bound = (probability * (2**64 - 1)).ceil
+          @description = format('TraceIdRatioBased{%.6f}', probability)
+        end
+
+        def sample?(trace_id)
+          @probability == 1.0 || trace_id[8, 8].unpack1('Q>') < @id_upper_bound
+        end
 
         # @api private
         #
