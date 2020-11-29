@@ -23,11 +23,7 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
   SpanContext = OpenTelemetry::Trace::SpanContext
 
   let(:current_span_key) do
-    ::OpenTelemetry::Trace::Propagation::ContextKeys.current_span_key
-  end
-
-  let(:extracted_span_context_key) do
-    ::OpenTelemetry::Trace::Propagation::ContextKeys.extracted_span_context_key
+    OpenTelemetry::Trace::Propagation::ContextKeys.current_span_key
   end
 
   let(:propagator) do
@@ -93,25 +89,27 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
   let(:context) do
     span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'))
     span = Span.new(span_context: span_context)
-    ::OpenTelemetry::Context.empty.set_value(current_span_key, span)
+    OpenTelemetry::Trace.context_with_span(span, parent_context: OpenTelemetry::Context.empty)
   end
+
   let(:context_with_tracestate) do
     span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'),
                                    tracestate: tracestate_header)
     span = Span.new(span_context: span_context)
-    OpenTelemetry::Context.empty.set_value(current_span_key, span)
+    OpenTelemetry::Trace.context_with_span(span, parent_context: OpenTelemetry::Context.empty)
   end
 
   let(:context_with_trace_flags) do
     span_context = SpanContext.new(trace_id: Array(otel_trace_id).pack('H*'), span_id: Array(otel_span_id).pack('H*'), trace_flags: trace_flags)
     span = Span.new(span_context: span_context)
-    OpenTelemetry::Context.empty.set_value(current_span_key, span)
+    OpenTelemetry::Trace.context_with_span(span, parent_context: OpenTelemetry::Context.empty)
   end
 
   let(:context_without_current_span) do
     span_context = SpanContext.new(trace_id: Array('f' * 32).pack('H*'), span_id: Array('1' * 16).pack('H*'),
                                    tracestate: tracestate_header)
-    OpenTelemetry::Context.empty.set_value(extracted_span_context_key, span_context)
+    span = Span.new(span_context: span_context)
+    OpenTelemetry::Trace.context_with_span(span, parent_context: OpenTelemetry::Context.empty)
   end
 
   describe '#inject' do
@@ -142,27 +140,29 @@ describe OpenTelemetry::Exporters::Datadog::Exporter do
 
   describe '#extract' do
     it 'returns original context on error' do
-      context = propagator.extract(invalid_dd_headers, OpenTelemetry::Context.empty)[extracted_span_context_key]
-
-      assert_nil(context)
+      parent_context = OpenTelemetry::Context.empty
+      context = propagator.extract(invalid_dd_headers, parent_context)
+      _(context).must_equal(parent_context)
     end
 
     it 'returns a remote SpanContext with fields from the datadog headers' do
-      context = propagator.extract(valid_dd_headers, OpenTelemetry::Context.empty)[extracted_span_context_key]
+      context = propagator.extract(valid_dd_headers, OpenTelemetry::Context.empty)
+      extracted_context = OpenTelemetry::Trace.current_span(context).context
 
-      _(context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
-      _(context.span_id.unpack1('H*')).must_equal(otel_span_id)
-      _(context.trace_flags&.sampled?).must_equal(true)
-      _(context.tracestate).must_equal(tracestate_header)
+      _(extracted_context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
+      _(extracted_context.span_id.unpack1('H*')).must_equal(otel_span_id)
+      _(extracted_context.trace_flags&.sampled?).must_equal(true)
+      _(extracted_context.tracestate).must_equal(tracestate_header)
     end
 
     it 'accounts for rack specific headers' do
-      context = propagator.extract(rack_dd_headers, OpenTelemetry::Context.empty)[extracted_span_context_key]
+      context = propagator.extract(rack_dd_headers, OpenTelemetry::Context.empty)
+      extracted_context = OpenTelemetry::Trace.current_span(context).context
 
-      _(context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
-      _(context.span_id.unpack1('H*')).must_equal(otel_span_id)
-      _(context.trace_flags&.sampled?).must_equal(true)
-      _(context.tracestate).must_equal(tracestate_header)
+      _(extracted_context.trace_id.unpack1('H*')).must_equal(otel_trace_id[0, 16])
+      _(extracted_context.span_id.unpack1('H*')).must_equal(otel_span_id)
+      _(extracted_context.trace_flags&.sampled?).must_equal(true)
+      _(extracted_context.tracestate).must_equal(tracestate_header)
     end
   end
 

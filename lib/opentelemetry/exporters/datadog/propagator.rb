@@ -24,13 +24,13 @@ module OpenTelemetry
         DD_ORIGIN = '_dd_origin'
         ORIGIN_REGEX = /#{DD_ORIGIN}\=(.*?)($|,)/.freeze
         DEFAULT_INJECTORS = [
-          OpenTelemetry::Trace::Propagation::TraceContext.text_injector,
-          OpenTelemetry::CorrelationContext::Propagation.text_injector
+          OpenTelemetry::Trace::Propagation::TraceContext.text_map_injector,
+          OpenTelemetry::Baggage::Propagation.text_map_injector
         ].freeze
 
         DEFAULT_EXTRACTORS = [
           OpenTelemetry::Trace::Propagation::TraceContext.rack_extractor,
-          OpenTelemetry::CorrelationContext::Propagation.rack_extractor
+          OpenTelemetry::Baggage::Propagation.rack_extractor
         ].freeze
 
         # Returns a new Propagator
@@ -92,7 +92,8 @@ module OpenTelemetry
                                                 tracestate: tracestate,
                                                 remote: true)
 
-          context.set_value(Trace::Propagation::ContextKeys.extracted_span_context_key, span_context)
+          span = Trace::Span.new(span_context: span_context)
+          Trace.context_with_span(span, parent_context: context)
         rescue StandardError => e
           OpenTelemetry.logger.debug("error extracting datadog propagation, #{e.message}")
           context
@@ -116,8 +117,7 @@ module OpenTelemetry
         end
 
         def span_context_from(context)
-          context[Trace::Propagation::ContextKeys.current_span_key]&.context ||
-            context[Trace::Propagation::ContextKeys.extracted_span_context_key]
+          OpenTelemetry::Trace.current_span(context).context
         end
 
         def get_origin_string(tracestate)

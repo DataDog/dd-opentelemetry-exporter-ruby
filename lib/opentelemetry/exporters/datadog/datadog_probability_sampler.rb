@@ -5,7 +5,7 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2020 Datadog, Inc.
 
-require 'opentelemetry/sdk/trace/samplers/probability_sampler'
+require 'opentelemetry/sdk/trace/samplers/trace_id_ratio_based'
 require 'opentelemetry/sdk/trace/samplers/decision'
 require 'opentelemetry/sdk/trace/samplers/result'
 
@@ -13,11 +13,11 @@ module OpenTelemetry
   module Exporters
     module Datadog
       # Implements sampling based on a probability but records all spans regardless.
-      class DatadogProbabilitySampler < OpenTelemetry::SDK::Trace::Samplers::ProbabilitySampler
-        RECORD_AND_SAMPLED = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLED)
-        RECORD = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD)
+      class DatadogProbabilitySampler < OpenTelemetry::SDK::Trace::Samplers::TraceIdRatioBased
+        RECORD_AND_SAMPLE = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLE)
+        RECORD_ONLY = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_ONLY)
 
-        private_constant(:RECORD_AND_SAMPLED, :RECORD)
+        private_constant(:RECORD_AND_SAMPLE, :RECORD_ONLY)
 
         # @api private
         #
@@ -25,10 +25,10 @@ module OpenTelemetry
         def should_sample?(trace_id:, parent_context:, links:, name:, kind:, attributes:)
           # Ignored for sampling decision: links, name, kind, attributes.
 
-          if sample?(trace_id, parent_context)
-            RECORD_AND_SAMPLED
+          if sample?(trace_id)
+            RECORD_AND_SAMPLE
           else
-            RECORD
+            RECORD_ONLY
           end
         end
 
@@ -40,16 +40,10 @@ module OpenTelemetry
         def self.default_with_probability(probability = 1.0)
           raise ArgumentError, 'probability must be in range [0.0, 1.0]' unless (0.0..1.0).include?(probability)
 
-          new(probability,
-              ignore_parent: false,
-              apply_to_remote_parent: :root_spans_and_remote_parent,
-              apply_to_all_spans: :root_spans_and_remote_parent)
+          new(probability)
         end
 
-        DEFAULT = new(1.0,
-                      ignore_parent: false,
-                      apply_to_remote_parent: :root_spans_and_remote_parent,
-                      apply_to_all_spans: :root_spans_and_remote_parent)
+        DEFAULT = new(1.0)
       end
     end
   end
