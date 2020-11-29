@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'ddtrace', '~> 0.37'
   spec.add_dependency 'opentelemetry-api', '~> 0.9.0'
+  spec.add_dependency 'opentelemetry-common', '~> 0.9.0'
   spec.add_dependency 'opentelemetry-sdk', '~> 0.9.0'
 
   spec.add_development_dependency 'bundler', '>= 1.17'
