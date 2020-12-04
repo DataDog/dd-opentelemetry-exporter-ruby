@@ -8,7 +8,7 @@
 require 'test_helper'
 
 class MockProcessor
-  def on_start(span); end
+  def on_start(span, _parent_context); end
 
   def on_finish(span); end
 end
@@ -25,7 +25,7 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
   it 'encodes attributes in the span but not the events' do
     attributes = { 'akey' => 'avalue' }
     events = [
-      OpenTelemetry::Trace::Event.new(
+      OpenTelemetry::SDK::Trace::Event.new(
         name: 'event', attributes: { 'ekey' => 'evalue' }
       )
     ]
@@ -73,9 +73,9 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     span_context = OpenTelemetry::Trace::SpanContext.new(trace_id: trace_id, span_id: span_id)
     parent_context = OpenTelemetry::Trace::SpanContext.new(trace_id: trace_id, span_id: parent_id, tracestate: '_dd_origin=synthetics-example')
     other_context = OpenTelemetry::Trace::SpanContext.new(trace_id: trace_id, span_id: other_id)
-    otel_span_one = OpenTelemetry::SDK::Trace::Span.new(parent_context, span_names[0], nil, nil, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[0], nil, instrumentation_library)
-    otel_span_two = OpenTelemetry::SDK::Trace::Span.new(span_context, span_names[1], nil, parent_id, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[1], nil, instrumentation_library)
-    otel_span_three = OpenTelemetry::SDK::Trace::Span.new(other_context, span_names[2], nil, nil, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[2], nil, instrumentation_library)
+    otel_span_one = OpenTelemetry::SDK::Trace::Span.new(parent_context, nil, span_names[0], nil, nil, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[0], nil, instrumentation_library)
+    otel_span_two = OpenTelemetry::SDK::Trace::Span.new(span_context, parent_context, span_names[1], nil, parent_id, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[1], nil, instrumentation_library)
+    otel_span_three = OpenTelemetry::SDK::Trace::Span.new(other_context, nil, span_names[2], nil, nil, OpenTelemetry::SDK::Trace::Config::TraceConfig.new, MockProcessor.new, nil, nil, start_times[2], nil, instrumentation_library)
     otel_span_one.finish(end_timestamp: end_times[0])
     otel_span_two.finish(end_timestamp: end_times[1])
     otel_span_three.finish(end_timestamp: end_times[2])
@@ -117,12 +117,12 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
 
     events = [
-      OpenTelemetry::Trace::Event.new(
+      OpenTelemetry::SDK::Trace::Event.new(
         name: 'error', attributes: { 'error.type' => err_type, 'error.msg' => err_msg, 'error.stack' => err_stack }
       )
     ]
 
-    status = OpenTelemetry::Trace::Status.new(5, description: 'not found')
+    status = OpenTelemetry::Trace::Status.new(2, description: 'not found')
 
     span_data = create_span_data(attributes: attributes, events: events, status: status)
     encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
@@ -144,7 +144,96 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
     _(datadog_span_info.to_hash[:metrics]['_sample_rate']).must_equal(-1)
   end
 
-  def create_span_data(attributes: nil, events: nil, links: nil, trace_id: OpenTelemetry::Trace.generate_trace_id, trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT, status: nil, instrumentation_library: nil)
+  it 'sets the resource attributes as tags but not service.name, service.version, or deployment.environment' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service',
+                                 'service.version' => 'v1', 'other_info' => 'arbitrary_tag', 'deployment.environment' => 'prod' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    assert_nil(datadog_span_info.get_tag('service.version'))
+    assert_nil(datadog_span_info.get_tag('service.name'))
+    assert_nil(datadog_span_info.get_tag('deployment.environment'))
+    _(datadog_span_info.get_tag('other_info')).must_equal('arbitrary_tag')
+  end
+
+  it 'sets the resource attributes service.name as span service if it exists' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.service).must_equal('resource_defined_service')
+  end
+
+  it 'defaults to user provided service name if the resource attributes service.name does not exist' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.service).must_equal('example_service')
+  end
+
+  it 'sets the resource attributes service.version as span version if it exists' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service', 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service', 'example_env', 'fallback_version')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('version')).must_equal('v1')
+  end
+
+  it 'defaults to user provided version name if the resource attributes service.version does not exist' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service', 'example_env', 'fallback_version')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('version')).must_equal('fallback_version')
+  end
+
+  it 'sets the resource attributes deployment.environment as span env if it exists' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.name' => 'resource_defined_service',
+                                 'service.version' => 'v1', 'other_info' => 'arbitrary_tag', 'deployment.environment' => 'prod' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service', 'fallback_env')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('env')).must_equal('prod')
+  end
+
+  it 'defaults to user provided env if the resource attributes deployment.environment does not exist' do
+    attributes = { 'http.method' => 'GET', 'http.route' => '/example/api' }
+    otel_resource_attributes = { 'service.version' => 'v1', 'other_info' => 'arbitrary_tag' }
+    otel_resource = create_resource(attributes: otel_resource_attributes)
+
+    span_data = create_span_data(attributes: attributes, resource: otel_resource)
+    encoded_spans = span_encoder.translate_to_datadog([span_data], 'example_service', 'fallback_env')
+    datadog_span_info = encoded_spans[0]
+
+    _(datadog_span_info.get_tag('env')).must_equal('fallback_env')
+  end
+
+  def create_span_data(attributes: nil, events: nil, links: nil, trace_id: OpenTelemetry::Trace.generate_trace_id, trace_flags: OpenTelemetry::Trace::TraceFlags::DEFAULT, status: nil, instrumentation_library: nil, resource: nil)
     OpenTelemetry::SDK::Trace::SpanData.new(
       'example_name',
       nil,
@@ -153,17 +242,20 @@ describe OpenTelemetry::Exporters::Datadog::Exporter::SpanEncoder do
       0,
       0,
       0,
-      0,
       Time.now,
       Time.now,
       attributes,
       links,
       events,
-      nil,
+      resource,
       instrumentation_library,
       OpenTelemetry::Trace.generate_span_id,
       trace_id,
       trace_flags
     )
+  end
+
+  def create_resource(attributes: {})
+    OpenTelemetry::SDK::Resources::Resource.create(attributes)
   end
 end

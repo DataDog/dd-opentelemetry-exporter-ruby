@@ -53,7 +53,7 @@ module OpenTelemetry
 
         # datadog trace-agent endpoint requires a complete trace to be sent
         # threadsafe may block on lock
-        def on_start(span)
+        def on_start(span, _parent_context)
           context = span.context
           trace_id = context.trace_id
 
@@ -135,7 +135,7 @@ module OpenTelemetry
 
         # shuts the consumer thread down and flushes the current accumulated buffer
         # will block until the thread is finished
-        def shutdown
+        def shutdown(timeout: nil)
           lock do
             @keep_running = false
             @condition.signal

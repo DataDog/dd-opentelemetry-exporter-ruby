@@ -35,6 +35,8 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
               1
             end
 
+  let(:parent_context) { OpenTelemetry::Context.empty }
+
   class TestExporter
     def initialize(status_codes: nil)
       @status_codes = status_codes || []
@@ -125,7 +127,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
       te = TestExporter.new
       dsp = DatadogSpanProcessor.new(exporter: te)
       ts = TestSpan.new
-      dsp.on_start(ts)
+      dsp.on_start(ts, parent_context)
       dsp.on_finish(ts)
 
       dsp.shutdown
@@ -142,7 +144,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
 
       tss = [TestSpan.new, TestSpan.new, TestSpan.new, TestSpan.new]
       tss.each do |ts|
-        dsp.on_start(ts)
+        dsp.on_start(ts, parent_context)
         dsp.on_finish(ts)
       end
       dsp.shutdown
@@ -160,7 +162,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
       spans = [TestSpan.new(1, true, trace_id), TestSpan.new(2, true, trace_id), TestSpan.new(3, true, trace_id)]
 
       spans.each do |span|
-        dsp.on_start(span)
+        dsp.on_start(span, parent_context)
       end
 
       spans.each do |span|
@@ -180,7 +182,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
 
       tss = [TestSpan.new, TestSpan.new(nil, false)]
       tss.each do |ts|
-        dsp.on_start(ts)
+        dsp.on_start(ts, parent_context)
         dsp.on_finish(ts)
       end
       dsp.shutdown
@@ -198,7 +200,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
         Thread.new do
           100.times do |j|
             span = TestSpan.new(j + (i * 100))
-            dsp.on_start(span)
+            dsp.on_start(span, parent_context)
             dsp.on_finish(span)
           end
           sleep(rand(0.01))
@@ -226,7 +228,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
 
       tss = [TestSpan.new, TestSpan.new, TestSpan.new]
       tss.each do |ts|
-        dsp.on_start(ts)
+        dsp.on_start(ts, parent_context)
         dsp.on_finish(ts)
       end
       sleep 0.75
@@ -245,7 +247,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
 
       tss = [TestSpan.new, TestSpan.new, TestSpan.new]
       tss.each do |ts|
-        dsp.on_start(ts)
+        dsp.on_start(ts, parent_context)
         dsp.on_finish(ts)
       end
       sleep 0.5
@@ -265,7 +267,7 @@ describe OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor do
       spans = [TestSpan.new(1, true, trace_id), TestSpan.new, TestSpan.new, TestSpan.new(4, true, trace_id)]
 
       4.times do |count|
-        dsp.on_start(spans[count])
+        dsp.on_start(spans[count], parent_context)
       end
 
       3.times do |count|

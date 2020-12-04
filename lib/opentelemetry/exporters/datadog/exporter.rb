@@ -7,9 +7,8 @@
 
 require 'uri'
 require 'ddtrace'
-require 'opentelemetry/sdk'
+require 'opentelemetry'
 require 'opentelemetry/exporters/datadog/exporter/span_encoder'
-# require_relative './exporter/span_encoder.rb'
 
 module OpenTelemetry
   module Exporters
@@ -22,16 +21,8 @@ module OpenTelemetry
       class Exporter
         DEFAULT_AGENT_URL = 'http://localhost:8126'
         DEFAULT_SERVICE_NAME = 'my_service'
-        SUCCESS = begin
-                    OpenTelemetry::SDK::Trace::Export::SUCCESS
-                  rescue NameError
-                    0
-                  end
-        FAILURE = begin
-                    OpenTelemetry::SDK::Trace::Export::FAILURE
-                  rescue NameError
-                    1
-                  end
+        SUCCESS = 0
+        FAILURE = 1
         private_constant(:SUCCESS, :FAILURE)
 
         def initialize(service_name: nil, agent_url: nil, env: nil, version: nil, tags: nil)
@@ -68,7 +59,7 @@ module OpenTelemetry
 
         # Called when {TracerProvider#shutdown} is called, if this exporter is
         # registered to a {TracerProvider} object.
-        def shutdown
+        def shutdown(timeout: nil)
           @shutdown = true
         end
 

@@ -5,7 +5,7 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2020 Datadog, Inc.
 
-require 'opentelemetry/sdk/trace/samplers/probability_sampler'
+require 'opentelemetry/sdk/trace/samplers/trace_id_ratio_based'
 require 'opentelemetry/sdk/trace/samplers/decision'
 require 'opentelemetry/sdk/trace/samplers/result'
 
@@ -13,22 +13,29 @@ module OpenTelemetry
   module Exporters
     module Datadog
       # Implements sampling based on a probability but records all spans regardless.
-      class DatadogProbabilitySampler < OpenTelemetry::SDK::Trace::Samplers::ProbabilitySampler
-        RECORD_AND_SAMPLED = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLED)
-        RECORD = OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD)
+      class DatadogProbabilitySampler
+        attr_reader :description
 
-        private_constant(:RECORD_AND_SAMPLED, :RECORD)
+        def initialize(probability)
+          @probability = probability
+          @id_upper_bound = (probability * (2**64 - 1)).ceil
+          @description = format('TraceIdRatioBased{%.6f}', probability)
+        end
+
+        def sample?(trace_id)
+          @probability == 1.0 || trace_id[8, 8].unpack1('Q>') < @id_upper_bound
+        end
 
         # @api private
         #
         # See {Samplers}.
         def should_sample?(trace_id:, parent_context:, links:, name:, kind:, attributes:)
           # Ignored for sampling decision: links, name, kind, attributes.
-
-          if sample?(trace_id, parent_context)
-            RECORD_AND_SAMPLED
+          tracestate = OpenTelemetry::Trace.current_span(parent_context).context.tracestate
+          if sample?(trace_id)
+            OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLE, tracestate: tracestate)
           else
-            RECORD
+            OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_ONLY, tracestate: tracestate)
           end
         end
 
@@ -40,16 +47,10 @@ module OpenTelemetry
         def self.default_with_probability(probability = 1.0)
           raise ArgumentError, 'probability must be in range [0.0, 1.0]' unless (0.0..1.0).include?(probability)
 
-          new(probability,
-              ignore_parent: false,
-              apply_to_remote_parent: :root_spans_and_remote_parent,
-              apply_to_all_spans: :root_spans_and_remote_parent)
+          new(probability)
         end
 
-        DEFAULT = new(1.0,
-                      ignore_parent: false,
-                      apply_to_remote_parent: :root_spans_and_remote_parent,
-                      apply_to_all_spans: :root_spans_and_remote_parent)
+        DEFAULT = new(1.0)
       end
     end
   end
