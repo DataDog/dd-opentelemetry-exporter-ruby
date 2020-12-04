@@ -136,7 +136,7 @@ You can configure the application to automatically tag your Datadog exported tra
  - `DD_TAGS`: Custom tags in value pairs separated by `,` (e.g. `layer:api,team:intake`)
     - If `DD_ENV`, `DD_SERVICE` or `DD_VERSION` are set, it will override any respective `env`/`service`/`version` tag defined in `DD_TAGS`.
     - If `DD_ENV`, `DD_SERVICE` or `DD_VERSION` are NOT set, tags defined in `DD_TAGS` will be used to populate `env`/`service`/`version` respectively.
-
+    - As a fallback, Resource attributes `deployment.environment` `service.name`, and `service.version` will be used to populate `env`/`service`/`version` respectively.
 These values can also be overridden at the trace exporter level:
 
 ```ruby
