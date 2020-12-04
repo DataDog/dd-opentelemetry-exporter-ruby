@@ -9,7 +9,6 @@ require 'uri'
 require 'ddtrace'
 require 'opentelemetry'
 require 'opentelemetry/exporters/datadog/exporter/span_encoder'
-# require_relative './exporter/span_encoder.rb'
 
 module OpenTelemetry
   module Exporters

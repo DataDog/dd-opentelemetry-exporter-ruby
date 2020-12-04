@@ -11,8 +11,5 @@ gemspec
 
 # Use the opentelemetry-api gem from source
 gem 'ddtrace', '~> 0.37'
-gem 'opentelemetry-api', '~> 0.9.0'
-
-group :development, :test do
-  gem 'opentelemetry-sdk', '~> 0.9.0'
-end
+gem 'opentelemetry-api', '~> 0.10.0'
+gem 'opentelemetry-sdk', '~> 0.10.0'

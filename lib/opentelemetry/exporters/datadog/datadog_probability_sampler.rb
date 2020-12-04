@@ -5,17 +5,16 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2020 Datadog, Inc.
 
+require 'opentelemetry/sdk/trace/samplers/trace_id_ratio_based'
+require 'opentelemetry/sdk/trace/samplers/decision'
+require 'opentelemetry/sdk/trace/samplers/result'
+
 module OpenTelemetry
   module Exporters
     module Datadog
       # Implements sampling based on a probability but records all spans regardless.
       class DatadogProbabilitySampler
         attr_reader :description
-
-        RECORD_AND_SAMPLE = Datadog::Result.new(decision: Datadog::Decision::RECORD_AND_SAMPLE)
-        RECORD_ONLY = Datadog::Result.new(decision: Datadog::Decision::RECORD_ONLY)
-
-        private_constant(:RECORD_AND_SAMPLE, :RECORD_ONLY)
 
         def initialize(probability)
           @probability = probability
@@ -32,11 +31,11 @@ module OpenTelemetry
         # See {Samplers}.
         def should_sample?(trace_id:, parent_context:, links:, name:, kind:, attributes:)
           # Ignored for sampling decision: links, name, kind, attributes.
-
+          tracestate = OpenTelemetry::Trace.current_span(parent_context).context.tracestate
           if sample?(trace_id)
-            RECORD_AND_SAMPLE
+            OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_AND_SAMPLE, tracestate: tracestate)
           else
-            RECORD_ONLY
+            OpenTelemetry::SDK::Trace::Samplers::Result.new(decision: OpenTelemetry::SDK::Trace::Samplers::Decision::RECORD_ONLY, tracestate: tracestate)
           end
         end
 
