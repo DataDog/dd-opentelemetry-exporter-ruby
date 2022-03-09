@@ -1,8 +1,10 @@
+# dd-opentelemetry-exporter-ruby
+
+*Note*: This Repository has been deprecated and is no longer actively maintained.  Please refer to [OTLP Ingest in Datadog Agent](https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent) for support options for using OpenTelemetry and Datadog.
+
+# OpenTelemetry Datadog Span Exporter
+
 **[DEPRECATED]**
-
-# opentelemetry-exporters-datadog
-
-*Note*: This Repository has been deprecated and is no longer actively maintained.  Please refer to [Datadog Documentation](https://docs.datadoghq.com/tracing/setup_overview/open_standards/) for support options for using OpenTelemetry and Datadog.
 
 The `opentelemetry-exporters-datadog` gem provides a Datadog exporter for OpenTelemetry for Ruby. Using `opentelemetry-exporters-datadog`, an application can configure OpenTelemetry to export collected tracing data to [Datadog][datadog-home].
 
