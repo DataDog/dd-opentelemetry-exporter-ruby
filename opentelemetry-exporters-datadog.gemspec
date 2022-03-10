@@ -16,8 +16,11 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Datadog, Inc.']
   spec.email       = ['dev@datadoghq.com']
 
-  spec.summary     = 'Datadog trace exporter for the OpenTelemetry framework'
+  spec.summary     = '[Deprecated] Datadog trace exporter for the OpenTelemetry framework'
   spec.description = <<-DESC.gsub(/^[\s]+/, '')
+    This exporter has been deprecated. To export your OTLP traces from OpenTelemetry
+    SDK directly to Datadog Agent, please refer to OTLP Ingest in Datadog Agent.\n
+
     opentelemetry-exporters-datadog is Datadog’s trace exporter for the OpenTelemetry
     Ruby tracing library, which  is used to trace requests across web servers, databases
     and microservices. The exporter formats and sends these traces to a Datadog Agent so
@@ -26,6 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
   spec.license     = 'Apache-2.0'
+  s.metadata    = { "otlp_ingest_in_datadog_agent" => "https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent" }
 
   spec.files = ::Dir.glob('lib/**/*.rb') +
                ::Dir.glob('*.md') +
