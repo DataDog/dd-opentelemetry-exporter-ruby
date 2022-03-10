@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.summary     = '[Deprecated] Datadog trace exporter for the OpenTelemetry framework'
   spec.description = <<-DESC.gsub(/^[\s]+/, '')
     This exporter has been deprecated. To export your OTLP traces from OpenTelemetry
-    SDK directly to Datadog Agent, please refer to OTLP Ingest in Datadog Agent.\n
+    SDK directly to Datadog Agent, please refer to OTLP Ingest in Datadog Agent.
 
     opentelemetry-exporters-datadog is Datadog’s trace exporter for the OpenTelemetry
     Ruby tracing library, which  is used to trace requests across web servers, databases
