@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.homepage    = 'https://github.com/Datadog/dd-opentelemetry-exporter-ruby'
   spec.license     = 'Apache-2.0'
-  s.metadata    = { "otlp_ingest_in_datadog_agent" => "https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent" }
+  spec.metadata    = { "otlp_ingest_in_datadog_agent" => "https://docs.datadoghq.com/tracing/setup_overview/open_standards/#otlp-ingest-in-datadog-agent" }
 
   spec.files = ::Dir.glob('lib/**/*.rb') +
                ::Dir.glob('*.md') +
