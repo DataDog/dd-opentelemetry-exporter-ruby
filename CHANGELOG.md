@@ -1,6 +1,6 @@
 # Release History: opentelemetry-exporters-datadog
 
-## [Unreleased]
+## [0.2.1] - 2022-03-10
 
 ### Added
 - deprecate opentelemetry-exporters-datadog gem
