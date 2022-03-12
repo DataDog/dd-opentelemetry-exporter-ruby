@@ -48,7 +48,7 @@ require 'opentelemetry-exporters-datadog'
 OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
     OpenTelemetry::Exporters::Datadog::DatadogSpanProcessor.new(
-      OpenTelemetry::Exporters::Datadog::Exporter.new(
+      exporter: OpenTelemetry::Exporters::Datadog::Exporter.new(
         service_name: 'my_service', agent_url: 'http://localhost:8126'
       )
     )
@@ -101,8 +101,8 @@ For additional examples, see the [examples on github][examples-github].
 ```ruby
 #sampling rate must be a value between 0.0 and 1.0
 sampling_rate = 0.75 
-OpenTelemetry.tracer_provider.active_trace_config  = OpenTelemetry::SDK::Tracer::Config::Tracer::TraceConfig.new(
-  sampler: OpenTelemetry::SDK::Trace::Export::DatadogProbabilitySampler.default_with_probability(sampling_rate)
+OpenTelemetry.tracer_provider.active_trace_config  = OpenTelemetry::SDK::Trace::Config::TraceConfig.new(
+  sampler: OpenTelemetry::Exporters::Datadog::DatadogProbabilitySampler.default_with_probability(sampling_rate)
 )
 ```
 
@@ -174,3 +174,4 @@ The `opentelemetry-exporters-datadog` gem is distributed under the Apache 2.0 li
 [bundler-home]: https://bundler.io
 [license-github]: https://github.com/DataDog/dd-opentelemetry-exporter-ruby/blob/master/LICENSE
 [examples-github]: https://github.com/open-telemetry/opentelemetry-ruby/tree/master/examples
+touch
