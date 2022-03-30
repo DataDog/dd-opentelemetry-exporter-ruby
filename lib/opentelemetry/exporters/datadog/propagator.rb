@@ -14,15 +14,16 @@ module OpenTelemetry
     module Datadog
       # Injects context into carriers using the W3C Trace Context format
       class Propagator
-        include OpenTelemetry::Context::Propagation::DefaultSetter
-        include OpenTelemetry::Context::Propagation::DefaultGetter
-
         TRACE_ID_KEY = 'x-datadog-trace-id'
         PARENT_ID_KEY = 'x-datadog-parent-id'
         SAMPLING_PRIORITY_KEY = 'x-datadog-sampling-priority'
         ORIGIN_KEY = 'x-datadog-origin'
         DD_ORIGIN = '_dd_origin'
         ORIGIN_REGEX = /#{DD_ORIGIN}\=(.*?)($|,)/.freeze
+
+        DEFAULT_GETTER = ->(carrier, key) { carrier[key] }
+        DEFAULT_SETTER = ->(carrier, key, value) { carrier[key] = value }
+
         DEFAULT_INJECTORS = [
           OpenTelemetry::Trace::Propagation::TraceContext.text_map_injector,
           OpenTelemetry::Baggage::Propagation.text_map_injector
@@ -74,7 +75,7 @@ module OpenTelemetry
         # @return [Context] Updated context with span context from the header, or the original
         #   context if parsing fails.
         def extract(carrier, context, &getter)
-          getter ||= default_getter
+          getter ||= DEFAULT_GETTER
           trace_id = getter.call(carrier, TRACE_ID_KEY) || getter.call(carrier, rack_helper(TRACE_ID_KEY))
           span_id = getter.call(carrier, PARENT_ID_KEY) || getter.call(carrier, rack_helper(PARENT_ID_KEY))
           sampled = getter.call(carrier, SAMPLING_PRIORITY_KEY) || getter.call(carrier, rack_helper(SAMPLING_PRIORITY_KEY))
